@@ -1,0 +1,50 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Evaluations Monitor{% endblock %}
+{% block page_title %}Evaluations Monitor{% endblock %}
+{% block page_subtitle %}Inspect completed evaluations submitted by supervisors{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><h5>Evaluation Reports</h5></div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Supervisor</th>
+          <th>Final Score</th>
+          <th>Grade</th>
+          <th>Status</th>
+          <th>Submitted</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for evaluation in evaluations %}
+        <tr>
+          <td>{{ evaluation.student.user.get_full_name }}</td>
+          <td>{{ evaluation.supervisor.get_full_name }}</td>
+          <td>{{ evaluation.final_score }}</td>
+          <td>{{ evaluation.get_grade_letter }}</td>
+          <td>
+            {% if evaluation.is_completed %}
+            <span class="badge badge-success">Completed</span>
+            {% else %}
+            <span class="badge badge-warning">Draft</span>
+            {% endif %}
+          </td>
+          <td>{{ evaluation.updated_at|date:'M d, Y' }}</td>
+          <td>
+            <form method="post" action="{% url 'dean:evaluation_delete' evaluation.id %}" onsubmit="return confirm('Delete this evaluation?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="text-muted p-3">No evaluations recorded yet.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

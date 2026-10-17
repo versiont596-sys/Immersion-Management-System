@@ -1,0 +1,140 @@
+{% extends 'students/base_student.html' %}
+{% block title %}Evaluation{% endblock %}
+{% block page_title %}My Evaluation{% endblock %}
+{% block page_subtitle %}View your immersion evaluation and final grade{% endblock %}
+
+{% block content %}
+{% if evaluation %}
+<div class="row g-4">
+  <!-- SCORE OVERVIEW -->
+  <div class="col-lg-4">
+    <div class="card" style="text-align:center;">
+      <div class="card-body py-4">
+        <div style="font-size:13px;color:#94A3B8;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Final Score</div>
+        <div style="font-size:72px;font-weight:800;font-family:'Poppins',sans-serif;line-height:1;
+          color:{% if evaluation.final_score >= 85 %}#10B981{% elif evaluation.final_score >= 75 %}#F59E0B{% else %}#EF4444{% endif %};">
+          {{ evaluation.final_score|floatformat:1 }}
+        </div>
+        <div style="font-size:18px;color:#64748B;margin-top:4px;">out of 100</div>
+        <div style="margin-top:16px;">
+          <span style="font-size:28px;font-weight:700;padding:8px 20px;border-radius:50px;
+            background:{% if evaluation.final_score >= 85 %}#ECFDF5{% elif evaluation.final_score >= 75 %}#FFFBEB{% else %}#FEF2F2{% endif %};
+            color:{% if evaluation.final_score >= 85 %}#059669{% elif evaluation.final_score >= 75 %}#D97706{% else %}#DC2626{% endif %};
+            font-family:'Poppins',sans-serif;">
+            {{ evaluation.get_grade_letter }}
+          </span>
+        </div>
+        <div style="margin-top:12px;font-size:13px;color:#64748B;">
+          {% if evaluation.is_completed %}
+          <span class="badge badge-success"><i class="fas fa-check me-1"></i>Evaluation Complete</span>
+          {% else %}
+          <span class="badge badge-warning"><i class="fas fa-clock me-1"></i>In Progress</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% if evaluation.remarks %}
+    <div class="card mt-3">
+      <div class="card-header"><i class="fas fa-comment" style="color:#F59E0B;"></i><h5>Remarks</h5></div>
+      <div class="card-body" style="font-size:14px;color:#374151;line-height:1.7;">{{ evaluation.remarks }}</div>
+    </div>
+    {% endif %}
+
+    {% if evaluation.recommendation %}
+    <div class="card mt-3">
+      <div class="card-header"><i class="fas fa-thumbs-up" style="color:#10B981;"></i><h5>Recommendation</h5></div>
+      <div class="card-body" style="font-size:14px;color:#374151;line-height:1.7;">{{ evaluation.recommendation }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- CRITERIA BREAKDOWN -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-chart-bar" style="color:#2563EB;"></i><h5>Criteria Breakdown</h5></div>
+      <div class="card-body">
+        {% for label, value in criteria %}
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span style="font-size:14px;font-weight:600;color:#1E293B;">{{ label }}</span>
+            <span style="font-size:14px;font-weight:700;color:
+              {% if value >= 85 %}#10B981{% elif value >= 75 %}#F59E0B{% else %}#EF4444{% endif %};">
+              {{ value }}/100
+            </span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" role="progressbar"
+                 style="width:{{ value }}%;background:{% if value >= 85 %}#10B981{% elif value >= 75 %}#F59E0B{% else %}#EF4444{% endif %};"
+                 aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="row g-3">
+          {% for label, score in evaluation_criteria %}
+          <div class="col-md-6">
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span style="font-size:14px;font-weight:600;">{{ label }}</span>
+                <span style="font-weight:700;color:#2563EB;">{{ score }}%</span>
+              </div>
+              <div class="progress"><div class="progress-bar" style="width:{{ score }}%;background:linear-gradient(90deg,#2563EB,#10B981);"></div></div>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="col-md-6">
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1"><span style="font-size:14px;font-weight:600;">Punctuality</span><span style="font-weight:700;color:#2563EB;">{{ evaluation.punctuality }}%</span></div>
+              <div class="progress"><div class="progress-bar" style="width:{{ evaluation.punctuality }}%;background:linear-gradient(90deg,#2563EB,#10B981);"></div></div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1"><span style="font-size:14px;font-weight:600;">Attendance</span><span style="font-weight:700;color:#2563EB;">{{ evaluation.attendance }}%</span></div>
+              <div class="progress"><div class="progress-bar" style="width:{{ evaluation.attendance }}%;background:linear-gradient(90deg,#2563EB,#10B981);"></div></div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1"><span style="font-size:14px;font-weight:600;">Work Quality</span><span style="font-weight:700;color:#2563EB;">{{ evaluation.work_quality }}%</span></div>
+              <div class="progress"><div class="progress-bar" style="width:{{ evaluation.work_quality }}%;background:linear-gradient(90deg,#2563EB,#10B981);"></div></div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1"><span style="font-size:14px;font-weight:600;">Professionalism</span><span style="font-weight:700;color:#2563EB;">{{ evaluation.professionalism }}%</span></div>
+              <div class="progress"><div class="progress-bar" style="width:{{ evaluation.professionalism }}%;background:linear-gradient(90deg,#2563EB,#10B981);"></div></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1"><span style="font-size:14px;font-weight:600;">Communication</span><span style="font-weight:700;color:#2563EB;">{{ evaluation.communication }}%</span></div>
+              <div class="progress"><div class="progress-bar" style="width:{{ evaluation.communication }}%;background:linear-gradient(90deg,#2563EB,#10B981);"></div></div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1"><span style="font-size:14px;font-weight:600;">Teamwork</span><span style="font-weight:700;color:#2563EB;">{{ evaluation.teamwork }}%</span></div>
+              <div class="progress"><div class="progress-bar" style="width:{{ evaluation.teamwork }}%;background:linear-gradient(90deg,#2563EB,#10B981);"></div></div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1"><span style="font-size:14px;font-weight:600;">Initiative</span><span style="font-weight:700;color:#2563EB;">{{ evaluation.initiative }}%</span></div>
+              <div class="progress"><div class="progress-bar" style="width:{{ evaluation.initiative }}%;background:linear-gradient(90deg,#2563EB,#10B981);"></div></div>
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;font-size:13px;color:#94A3B8;">
+      <i class="fas fa-user-tie me-1"></i>
+      Evaluated by: <strong>{{ evaluation.supervisor.get_full_name }}</strong>
+      &nbsp;·&nbsp; {{ evaluation.updated_at|date:"F d, Y" }}
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state" style="padding:100px;">
+    <i class="fas fa-star"></i>
+    <h5>No Evaluation Yet</h5>
+    <p style="color:#94A3B8;max-width:360px;margin:0 auto;">
+      Your supervisor hasn't submitted your evaluation yet. It will appear here once completed.
+    </p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

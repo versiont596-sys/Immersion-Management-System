@@ -1,0 +1,129 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Student Detail{% endblock %}
+{% block page_title %}Student Detail{% endblock %}
+{% block page_subtitle %}Review student progress, submissions, and attendance{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header"><h5>Student Profile</h5></div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-5">Name</dt>
+          <dd class="col-sm-7">{{ student.user.get_full_name }}</dd>
+          <dt class="col-sm-5">Student ID</dt>
+          <dd class="col-sm-7">{{ student.student_id }}</dd>
+          <dt class="col-sm-5">Strand</dt>
+          <dd class="col-sm-7">{{ student.get_strand_display }}</dd>
+          <dt class="col-sm-5">Section</dt>
+          <dd class="col-sm-7">{{ student.section }}</dd>
+          <dt class="col-sm-5">School Year</dt>
+          <dd class="col-sm-7">{{ student.school_year }}</dd>
+          <dt class="col-sm-5">Contact</dt>
+          <dd class="col-sm-7">{{ student.contact_number|default:'—' }}</dd>
+          <dt class="col-sm-5">Status</dt>
+          <dd class="col-sm-7">
+            {% if student.user.is_approved %}
+            <span class="badge badge-success">Approved</span>
+            {% else %}
+            <span class="badge badge-warning">Pending</span>
+            {% endif %}
+          </dd>
+        </dl>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h5>Summary</h5></div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between mb-2">
+          <div>Total Hours</div>
+          <div><strong>{{ total_hours }}</strong></div>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <div>Submissions</div>
+          <div><strong>{{ submissions|length }}</strong></div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <div>Daily Journals</div>
+          <div><strong>{{ journals|length }}</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card mb-3">
+      <div class="card-header"><h5>Recent Submissions</h5></div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Status</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for submission in submissions|slice:":5" %}
+            <tr>
+              <td>{{ submission.task.title }}</td>
+              <td>{{ submission.status|capfirst }}</td>
+              <td>{{ submission.submitted_at|date:'M d, Y' }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3"><div class="text-muted">No submissions yet.</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><h5>Attendance Records</h5></div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Group</th>
+              <th>Hours</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in attendance|slice:":5" %}
+            <tr>
+              <td>{{ record.date|date:'d M Y' }}</td>
+              <td>{{ record.group.name }}</td>
+              <td>{{ record.hours_rendered }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3"><div class="text-muted">No attendance records yet.</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h5>Recent Journals</h5></div>
+      <div class="card-body">
+        {% if journals %}
+        <ul class="list-group list-group-flush">
+          {% for journal in journals|slice:":5" %}
+          <li class="list-group-item">
+            <div class="d-flex justify-content-between">
+              <div><strong>{{ journal.date|date:'M d, Y' }}</strong></div>
+              <div class="text-muted">{{ journal.get_status_display }}</div>
+            </div>
+            <p class="mb-0 mt-2 text-muted">{{ journal.activities|truncatechars:120 }}</p>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-muted">No journal entries found.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

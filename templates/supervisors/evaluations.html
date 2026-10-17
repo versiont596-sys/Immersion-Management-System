@@ -1,0 +1,42 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Evaluations{% endblock %}
+{% block page_title %}Student Evaluations{% endblock %}
+{% block page_subtitle %}Evaluate your assigned students{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="table-responsive">
+    <table class="table">
+      <thead><tr><th>Student</th><th>Final Score</th><th>Status</th><th>Last Updated</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for student in students %}
+        {% with eval=evaluations|dictsort:"student_id" %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar">{{ student.user.first_name|first }}{{ student.user.last_name|first }}</div>
+              <div><div style="font-size:14px;font-weight:600;">{{ student.user.get_full_name }}</div><div style="font-size:12px;color:#64748B;">{{ student.strand }} | {{ student.section }}</div></div>
+            </div>
+          </td>
+          <td>
+            {% for e in evaluations %}{% if e.student == student %}<span style="font-size:18px;font-weight:700;color:#2563EB;">{{ e.final_score }}</span>{% endif %}{% endfor %}
+            {% if not evaluations %}<span style="color:#CBD5E1;">Not yet evaluated</span>{% endif %}
+          </td>
+          <td>
+            {% for e in evaluations %}{% if e.student == student %}
+            <span class="badge {% if e.is_completed %}badge-success{% else %}badge-warning{% endif %}">{% if e.is_completed %}Complete{% else %}In Progress{% endif %}</span>
+            {% endif %}{% endfor %}
+          </td>
+          <td style="font-size:12px;color:#64748B;">
+            {% for e in evaluations %}{% if e.student == student %}{{ e.updated_at|date:"M d, Y" }}{% endif %}{% endfor %}
+          </td>
+          <td><a href="{% url 'supervisors:evaluate_student' student.id %}" class="btn btn-sm btn-primary">Evaluate</a></td>
+        </tr>
+        {% endwith %}
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><i class="fas fa-star"></i><h5>No students to evaluate</h5></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

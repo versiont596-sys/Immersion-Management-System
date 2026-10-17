@@ -1,0 +1,154 @@
+{% extends 'students/base_student.html' %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block page_subtitle %}Manage your personal information{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <!-- PROFILE CARD -->
+  <div class="col-lg-4">
+    <div class="card text-center">
+      <div class="card-body py-4">
+        <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#10B981);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:white;margin:0 auto 16px;font-family:'Poppins',sans-serif;">
+          {% if request.user.profile_picture %}
+          <img src="{{ request.user.profile_picture.url }}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;" alt="Profile"/>
+          {% else %}
+          {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+          {% endif %}
+        </div>
+        <div style="font-size:20px;font-weight:700;color:#1E293B;font-family:'Poppins',sans-serif;">{{ request.user.get_full_name }}</div>
+        <div style="font-size:13px;color:#64748B;margin-top:4px;">{{ student.strand }} | {{ student.section }}</div>
+        <div style="font-size:13px;color:#2563EB;font-weight:600;margin-top:6px;">{{ student.student_id }}</div>
+        <span class="badge badge-success mt-2"><i class="fas fa-check me-1"></i>Account Approved</span>
+
+        <hr style="margin:20px 0;border-color:#E2E8F0;">
+
+        {% with a=student.get_active_assignment %}
+        {% if a %}
+        <div style="background:#ECFDF5;border-radius:10px;padding:14px;">
+          <div style="font-size:11px;color:#059669;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Immersion Company</div>
+          <div style="font-size:14px;font-weight:700;color:#064E3B;">{{ a.group.company.name }}</div>
+          <div style="font-size:12px;color:#047857;">{{ a.group.name }}</div>
+        </div>
+        {% else %}
+        <div style="background:#F1F5F9;border-radius:10px;padding:14px;">
+          <div style="font-size:13px;color:#94A3B8;">No company assigned yet</div>
+          <a href="{% url 'students:join_company' %}" class="btn btn-sm btn-primary mt-2">Join a Company</a>
+        </div>
+        {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT FORM -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-user-edit" style="color:#2563EB;"></i>
+        <h5>Edit Profile Information</h5>
+      </div>
+      <div class="card-body">
+        <form id="profile-form" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <div style="font-size:12px;color:#94A3B8;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Personal Information</div>
+              <div style="font-size:13px;color:#64748B;">Username and last name are locked after account creation.</div>
+            </div>
+            <div>
+              <button type="button" id="edit-profile-btn" class="btn btn-secondary btn-sm">Edit Profile</button>
+              <button type="submit" id="save-profile-btn" class="btn btn-primary btn-sm d-none">Save Changes</button>
+              <button type="button" id="cancel-edit-btn" class="btn btn-outline-secondary btn-sm d-none">Cancel</button>
+            </div>
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-control" value="{{ request.user.username }}" readonly />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">First Name</label>
+              <input type="text" name="first_name" class="form-control editable" value="{{ request.user.first_name }}" disabled />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-control" value="{{ request.user.last_name }}" readonly />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control editable" value="{{ request.user.email }}" disabled />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Contact Number</label>
+              <input type="text" name="contact_number" class="form-control editable" value="{{ student.contact_number }}" disabled />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Address</label>
+              <textarea name="address" class="form-control editable" rows="2" disabled>{{ student.address }}</textarea>
+            </div>
+          </div>
+
+          <div style="font-size:12px;color:#94A3B8;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">Guardian / Emergency Contact</div>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Guardian Name</label>
+              <input type="text" name="guardian_name" class="form-control editable" value="{{ student.guardian_name }}" disabled />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Guardian Contact</label>
+              <input type="text" name="guardian_contact" class="form-control editable" value="{{ student.guardian_contact }}" disabled />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Emergency Contact</label>
+              <input type="text" name="emergency_contact" class="form-control editable" value="{{ student.emergency_contact }}" disabled />
+            </div>
+          </div>
+
+          <div style="font-size:12px;color:#94A3B8;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">Profile Picture</div>
+          <div class="mb-4">
+            <input type="file" name="profile_picture" class="form-control editable" accept="image/*" disabled />
+            <div style="font-size:12px;color:#94A3B8;margin-top:4px;">Upload JPG, PNG (max 5MB)</div>
+          </div>
+
+          <div style="background:#F8FAFF;border-radius:10px;padding:16px;margin-bottom:20px;">
+            <div style="font-size:12px;color:#94A3B8;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">School Information (Read Only)</div>
+            <div class="row g-2">
+              <div class="col-md-4"><div style="font-size:12px;color:#94A3B8;">Strand</div><div style="font-size:13px;font-weight:600;">{{ student.strand }}</div></div>
+              <div class="col-md-4"><div style="font-size:12px;color:#94A3B8;">Section</div><div style="font-size:13px;font-weight:600;">{{ student.section }}</div></div>
+              <div class="col-md-4"><div style="font-size:12px;color:#94A3B8;">School Year</div><div style="font-size:13px;font-weight:600;">{{ student.school_year }}</div></div>
+            </div>
+          </div>
+        </form>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            const editButton = document.getElementById('edit-profile-btn');
+            const saveButton = document.getElementById('save-profile-btn');
+            const cancelButton = document.getElementById('cancel-edit-btn');
+            const editableFields = document.querySelectorAll('.editable');
+
+            function setEditMode(enabled) {
+              editableFields.forEach(field => {
+                field.disabled = !enabled;
+              });
+              editButton.classList.toggle('d-none', enabled);
+              saveButton.classList.toggle('d-none', !enabled);
+              cancelButton.classList.toggle('d-none', !enabled);
+            }
+
+            editButton.addEventListener('click', function() {
+              setEditMode(true);
+            });
+
+            cancelButton.addEventListener('click', function() {
+              window.location.reload();
+            });
+
+            setEditMode(false);
+          });
+        </script>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

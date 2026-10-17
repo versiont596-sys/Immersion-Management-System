@@ -1,0 +1,72 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Review Journal{% endblock %}
+{% block page_title %}Review Journal{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><h5>Review Journal</h5></div>
+  <div class="card-body">
+    <div class="row gy-4">
+      <div class="col-lg-6">
+        <div class="mb-3">
+          <div class="text-muted">Student</div>
+          <div>{{ journal.student.user.get_full_name }}</div>
+        </div>
+        <div class="mb-3">
+          <div class="text-muted">Date</div>
+          <div>{{ journal.date|date:'M d, Y' }}</div>
+        </div>
+        <div class="mb-3">
+          <div class="text-muted">Status</div>
+          <span class="badge {% if journal.status == 'approved' %}badge-success{% elif journal.status == 'rejected' %}badge-danger{% else %}badge-warning{% endif %}">{{ journal.get_status_display }}</span>
+        </div>
+        {% if journal.attachment %}
+        <div class="mb-3">
+          <a href="{{ journal.attachment.url }}" class="btn btn-sm btn-outline-primary" target="_blank"><i class="fas fa-paperclip me-1"></i>Download Attachment</a>
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-lg-6">
+        <div class="mb-3">
+          <div class="text-muted">Activities</div>
+          <div style="white-space:pre-wrap;">{{ journal.activities }}</div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="mb-3">
+          <div class="text-muted">Skills Learned</div>
+          <div style="white-space:pre-wrap;">{{ journal.skills_learned }}</div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="mb-3">
+          <div class="text-muted">Problems Encountered</div>
+          <div style="white-space:pre-wrap;">{{ journal.problems_encountered|default:'None' }}</div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="mb-3">
+          <div class="text-muted">Reflection</div>
+          <div style="white-space:pre-wrap;">{{ journal.reflection }}</div>
+        </div>
+      </div>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Review Status</label>
+        <select name="status" class="form-select">
+          <option value="approved" {% if journal.status == 'approved' %}selected{% endif %}>Approved</option>
+          <option value="rejected" {% if journal.status == 'rejected' %}selected{% endif %}>Rejected</option>
+          <option value="pending" {% if journal.status == 'pending' %}selected{% endif %}>Pending Review</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Supervisor Remarks</label>
+        <textarea name="remarks" class="form-control" rows="4">{{ journal.supervisor_remarks }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Review</button>
+      <a href="{% url 'supervisors:journals' %}" class="btn btn-outline-secondary ms-2">Back to Journals</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

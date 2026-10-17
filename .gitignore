@@ -1,0 +1,14 @@
+# Python virtual environments and bytecode
+venv/
+__pycache__/
+*.py[cod]
+
+# Local Django data and uploaded files
+db.sqlite3
+media/
+staticfiles/
+
+# Local environment variables
+.env
+.env.*
+!.env.example

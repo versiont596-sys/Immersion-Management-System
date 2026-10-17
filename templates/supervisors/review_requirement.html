@@ -1,0 +1,52 @@
+{% extends 'supervisors/base_supervisor.html' %}
+
+{% block title %}Review Requirement{% endblock %}
+{% block page_title %}Review Requirement{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h5>Review Requirement</h5>
+  </div>
+  <div class="card-body">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="mb-3">{{ requirement.student.user.get_full_name }} — {{ requirement.student.student_id }}</h5>
+            <p><strong>Requirement:</strong> {{ requirement.get_requirement_type_display }}</p>
+            <p><strong>Uploaded:</strong> {{ requirement.uploaded_at|date:'M d, Y g:i A' }}</p>
+            <p><strong>Current Status:</strong> {{ requirement.get_status_display }}</p>
+            <p><strong>Student Notes:</strong> {{ requirement.notes|default:'No notes provided.' }}</p>
+            {% if requirement.supervisor_comment %}
+            <p><strong>Previous Comment:</strong> {{ requirement.supervisor_comment }}</p>
+            {% endif %}
+            <p>
+              <a href="{{ requirement.file.url }}" target="_blank" class="btn btn-outline-primary">
+                <i class="fas fa-eye me-1"></i>View File
+              </a>
+            </p>
+          </div>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Review Action</label>
+            <select name="status" class="form-select">
+              <option value="approved" {% if requirement.status == 'approved' %}selected{% endif %}>Approve</option>
+              <option value="rejected" {% if requirement.status == 'rejected' %}selected{% endif %}>Reject</option>
+              <option value="pending" {% if requirement.status == 'pending' %}selected{% endif %}>Keep Pending</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Comment to Student</label>
+            <textarea name="supervisor_comment" class="form-control" rows="4" placeholder="Tell the student what is missing or what needs to be improved.">{{ requirement.supervisor_comment }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Review</button>
+          <a href="{% url 'supervisors:requirements' %}" class="btn btn-outline-secondary ms-2">Back</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

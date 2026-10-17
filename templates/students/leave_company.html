@@ -1,0 +1,41 @@
+{% extends 'students/base_student.html' %}
+{% block title %}Leave Company{% endblock %}
+{% block page_title %}Leave Immersion Company{% endblock %}
+{% block page_subtitle %}Confirm that you want to leave your current immersion group.{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="mb-3">{{ assignment.group.company.name }}</h5>
+        <p class="text-muted">Group: {{ assignment.group.name }}</p>
+        {% if pending_request %}
+          <div class="alert alert-warning">
+            Your leave request is currently <strong>{{ pending_request.get_status_display }}</strong>.
+            {% if pending_request.reason %}
+            <div class="mt-2"><strong>Reason:</strong> {{ pending_request.reason }}</div>
+            {% endif %}
+            {% if pending_request.response_note %}
+            <div class="mt-2"><strong>Dean response:</strong> {{ pending_request.response_note }}</div>
+            {% endif %}
+          </div>
+          <p>Please wait for the dean to approve or decline your request.</p>
+          <a href="{% url 'students:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        {% else %}
+          <p>Please submit a leave request so the dean can approve or decline it.</p>
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Reason (optional)</label>
+              <textarea name="reason" class="form-control" rows="4" placeholder="Tell your supervisor why you want to leave this group."></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger me-3">Request Leave</button>
+            <a href="{% url 'students:join_company' %}" class="btn btn-secondary">Cancel</a>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

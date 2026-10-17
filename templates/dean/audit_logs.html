@@ -1,0 +1,85 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Audit Trail{% endblock %}
+{% block page_title %}Audit Trail{% endblock %}
+{% block page_subtitle %}Complete log of all system actions{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <div>
+      <i class="fas fa-history" style="color:#7C3AED;"></i>
+      <h5>System Activity Log</h5>
+      <span class="badge badge-secondary ms-2">{{ logs|length }} entries</span>
+    </div>
+    <div>
+      <a href="{% url 'dean:export_audit_logs_pdf' %}" class="btn btn-sm btn-primary me-2">
+        <i class="fas fa-file-pdf me-1"></i> Export PDF
+      </a>
+      <form method="post" action="{% url 'dean:clear_audit_logs' %}" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-outline-danger">
+          <i class="fas fa-trash-alt me-1"></i> Clear Logs
+        </button>
+      </form>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>User</th>
+          <th>Action</th>
+          <th>Model</th>
+          <th>Details</th>
+          <th>IP Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td style="font-size:12px;white-space:nowrap;color:#64748B;">
+            {{ log.timestamp|date:"M d, Y" }}<br>
+            <strong>{{ log.timestamp|date:"g:i A" }}</strong>
+          </td>
+          <td>
+            {% if log.user %}
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar avatar-sm">{{ log.user.first_name|first }}{{ log.user.last_name|first }}</div>
+              <div>
+                <div style="font-size:13px;font-weight:600;">{{ log.user.get_full_name|default:log.user.username }}</div>
+                <div style="font-size:11px;color:#64748B;">{{ log.user.get_role_display }}</div>
+              </div>
+            </div>
+            {% else %}
+            <span style="color:#CBD5E1;font-size:13px;">System</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge
+              {% if log.action == 'create' %}badge-success
+              {% elif log.action == 'update' %}badge-info
+              {% elif log.action == 'delete' %}badge-danger
+              {% elif log.action == 'approve' %}badge-success
+              {% elif log.action == 'reject' %}badge-danger
+              {% elif log.action == 'assign' %}badge-purple
+              {% elif log.action == 'grade' %}badge-warning
+              {% else %}badge-secondary{% endif %}">
+              {{ log.get_action_display }}
+            </span>
+          </td>
+          <td style="font-size:13px;font-family:monospace;color:#1E293B;">{{ log.model_name }}</td>
+          <td style="font-size:12px;color:#64748B;max-width:200px;">
+            {% if log.object_repr %}<div style="font-weight:500;color:#1E293B;">{{ log.object_repr|truncatechars:40 }}</div>{% endif %}
+            {% if log.details %}{{ log.details|truncatechars:60 }}{% endif %}
+          </td>
+          <td style="font-size:12px;color:#94A3B8;font-family:monospace;">{{ log.ip_address|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty-state"><i class="fas fa-history"></i><h5>No audit logs yet</h5></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

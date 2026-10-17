@@ -1,0 +1,63 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Excuse Student{% endblock %}
+{% block page_title %}Excuse Student{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><h5>Excuse Student</h5></div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row gy-3">
+        <div class="col-md-6">
+          <label class="form-label">Group</label>
+          <select name="group" class="form-select" required>
+            <option value="">Select group</option>
+            {% for g in groups %}
+            <option value="{{ g.id }}">{{ g.name }}{% if g.company %} — {{ g.company.name }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Student</label>
+          <select name="student" class="form-select" required>
+            <option value="">Select student</option>
+            {% for student in students %}
+            <option value="{{ student.id }}">{{ student.user.get_full_name }} — {{ student.student_id }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Date</label>
+          <input type="date" name="date" class="form-control" required />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Time/Hours In</label>
+          <input type="time" name="time_in" class="form-control" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Time/Hours Out</label>
+          <input type="time" name="time_out" class="form-control" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="late">Late</option>
+            <option value="excused">Excused</option>
+            <option value="half_day">Half Day</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Remarks</label>
+          <textarea name="remarks" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Save Attendance</button>
+        <a href="{% url 'supervisors:attendance' %}" class="btn btn-outline-secondary ms-2">Back to Attendance</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Dean Dashboard{% endblock %}
+{% block page_title %}Dean Dashboard{% endblock %}
+{% block page_subtitle %}System overview and management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS ROW 1 -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fas fa-user-graduate"></i></div>
+      <div><div class="stat-value">{{ total_students }}</div><div class="stat-label">Students</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-building"></i></div>
+      <div><div class="stat-value">{{ total_companies }}</div><div class="stat-label">Companies</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="fas fa-user-tie"></i></div>
+      <div><div class="stat-value">{{ total_supervisors }}</div><div class="stat-label">Supervisors</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon teal"><i class="fas fa-layer-group"></i></div>
+      <div><div class="stat-value">{{ total_groups }}</div><div class="stat-label">Groups</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="fas fa-hourglass-half"></i></div>
+      <div><div class="stat-value">{{ pending_approvals }}</div><div class="stat-label">Pending Approvals</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-2">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-chart-pie"></i></div>
+      <div><div class="stat-value">{{ completion_rate }}%</div><div class="stat-label">Completion Rate</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- QUICK ACTIONS -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-bolt" style="color:#F59E0B;"></i><h5>Quick Actions</h5></div>
+      <div class="card-body p-0">
+        <a href="{% url 'dean:supervisor_create' %}" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;border-bottom:1px solid #E2E8F0;color:#1E293B;transition:background 0.15s;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''">
+          <div class="stat-icon purple" style="width:40px;height:40px;font-size:16px;border-radius:10px;flex-shrink:0;"><i class="fas fa-user-plus"></i></div>
+          <div><div style="font-size:14px;font-weight:600;">Create Supervisor</div><div style="font-size:12px;color:#64748B;">Add new supervisor account</div></div>
+          <i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;"></i>
+        </a>
+        <a href="{% url 'dean:company_create' %}" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;border-bottom:1px solid #E2E8F0;color:#1E293B;transition:background 0.15s;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''">
+          <div class="stat-icon green" style="width:40px;height:40px;font-size:16px;border-radius:10px;flex-shrink:0;"><i class="fas fa-building"></i></div>
+          <div><div style="font-size:14px;font-weight:600;">Add Company</div><div style="font-size:12px;color:#64748B;">Register new company</div></div>
+          <i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;"></i>
+        </a>
+        <a href="{% url 'dean:group_create' %}" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;border-bottom:1px solid #E2E8F0;color:#1E293B;transition:background 0.15s;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''">
+          <div class="stat-icon blue" style="width:40px;height:40px;font-size:16px;border-radius:10px;flex-shrink:0;"><i class="fas fa-layer-group"></i></div>
+          <div><div style="font-size:14px;font-weight:600;">Create Group</div><div style="font-size:12px;color:#64748B;">Set up immersion group</div></div>
+          <i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;"></i>
+        </a>
+        <a href="{% url 'dean:announcements' %}" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;color:#1E293B;transition:background 0.15s;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''">
+          <div class="stat-icon amber" style="width:40px;height:40px;font-size:16px;border-radius:10px;flex-shrink:0;"><i class="fas fa-bullhorn"></i></div>
+          <div><div style="font-size:14px;font-weight:600;">Post Announcement</div><div style="font-size:12px;color:#64748B;">Send school-wide notice</div></div>
+          <i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENDING APPROVALS -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-user-check" style="color:#2563EB;"></i>
+        <h5>Pending Approvals</h5>
+        {% if pending_approvals > 0 %}
+        <span class="badge badge-warning ms-auto">{{ pending_approvals }} new</span>
+        {% endif %}
+      </div>
+      <div class="card-body p-0">
+        {% for student in recent_students %}
+        {% if not student.is_approved %}
+        <div class="d-flex align-items-center gap-3 p-3" style="border-bottom:1px solid #E2E8F0;">
+          <div class="avatar">{{ student.first_name|first }}{{ student.last_name|first }}</div>
+          <div class="flex-1" style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:#1E293B;">{{ student.get_full_name }}</div>
+            <div style="font-size:12px;color:#64748B;">Registered {{ student.date_joined|timesince }} ago</div>
+          </div>
+          <div class="d-flex gap-1">
+            <a href="{% url 'dean:approve_student' student.id %}" class="btn btn-sm btn-success btn-icon" title="Approve">
+              <i class="fas fa-check"></i>
+            </a>
+            <a href="{% url 'dean:reject_student' student.id %}" class="btn btn-sm btn-danger btn-icon" title="Reject">
+              <i class="fas fa-times"></i>
+            </a>
+          </div>
+        </div>
+        {% endif %}
+        {% empty %}
+        <div class="empty-state">
+          <i class="fas fa-check-circle" style="color:#10B981;"></i>
+          <h5 style="color:#10B981;">All caught up!</h5>
+        </div>
+        {% endfor %}
+        <div style="padding:12px 16px;border-top:1px solid #E2E8F0;">
+          <a href="{% url 'dean:students' %}?status=pending" style="font-size:13px;color:#2563EB;text-decoration:none;font-weight:600;">
+            View all pending <i class="fas fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECENT ACTIVITY -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-history" style="color:#7C3AED;"></i><h5>Recent Activity</h5></div>
+      <div class="card-body p-0">
+        {% for log in recent_logs %}
+        <div style="padding:12px 16px;border-bottom:1px solid #E2E8F0;display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:8px;height:8px;border-radius:50%;background:
+            {% if log.action == 'create' %}#10B981
+            {% elif log.action == 'approve' %}#2563EB
+            {% elif log.action == 'reject' %}#EF4444
+            {% else %}#F59E0B{% endif %};
+            margin-top:5px;flex-shrink:0;"></div>
+          <div>
+            <div style="font-size:13px;color:#1E293B;font-weight:500;">
+              <strong>{{ log.user.get_full_name|default:log.user.username }}</strong>
+              {{ log.get_action_display|lower }} {{ log.model_name }}
+            </div>
+            <div style="font-size:11px;color:#94A3B8;">{{ log.timestamp|timesince }} ago</div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="empty-state"><i class="fas fa-history"></i><h5>No activity yet</h5></div>
+        {% endfor %}
+        <div style="padding:12px 16px;border-top:1px solid #E2E8F0;">
+          <a href="{% url 'dean:audit_logs' %}" style="font-size:13px;color:#2563EB;text-decoration:none;font-weight:600;">
+            Full audit log <i class="fas fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

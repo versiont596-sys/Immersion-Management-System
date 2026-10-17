@@ -1,0 +1,99 @@
+{% extends 'students/base_student.html' %}
+{% block title %}Tasks{% endblock %}
+{% block page_title %}My Tasks{% endblock %}
+{% block page_subtitle %}View and submit your immersion tasks{% endblock %}
+
+{% block content %}
+<!-- FILTER TABS -->
+<div class="d-flex gap-2 mb-4 flex-wrap">
+  {% for status, label in task_statuses %}
+  <a href="?status={{ status }}" class="btn btn-sm {% if filter_status == status %}btn-primary{% else %}btn-outline-secondary{% endif %}">{{ label }}</a>
+  {% empty %}
+  <a href="?status=all" class="btn btn-sm {% if filter_status == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All Tasks</a>
+  <a href="?status=pending" class="btn btn-sm {% if filter_status == 'pending' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Pending</a>
+  <a href="?status=submitted" class="btn btn-sm {% if filter_status == 'submitted' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Submitted</a>
+  <a href="?status=graded" class="btn btn-sm {% if filter_status == 'graded' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Graded</a>
+  <a href="?status=overdue" class="btn btn-sm {% if filter_status == 'overdue' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Overdue</a>
+  {% endfor %}
+</div>
+
+{% if task_data %}
+<div class="row g-3">
+  {% for item in task_data %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card h-100" style="border-top: 3px solid
+      {% if item.status == 'graded' %}#10B981
+      {% elif item.status == 'submitted' or item.status == 'late' %}#2563EB
+      {% elif item.status == 'overdue' %}#EF4444
+      {% else %}#F59E0B{% endif %};">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <span class="badge badge-
+            {% if item.status == 'graded' %}success
+            {% elif item.status == 'submitted' %}info
+            {% elif item.status == 'late' %}warning
+            {% elif item.status == 'overdue' %}danger
+            {% else %}secondary{% endif %}">
+            {% if item.status == 'not_submitted' %}Pending
+            {% elif item.status == 'late' %}Late Submitted
+            {% elif item.status == 'graded' %}Graded
+            {% elif item.status == 'overdue' %}Overdue
+            {% elif item.status == 'submitted' %}Submitted
+            {% else %}{{ item.status|title }}{% endif %}
+          </span>
+          {% if item.submission and item.submission.score is not None %}
+          <span style="font-size:15px;font-weight:700;color:#10B981;font-family:'Poppins',sans-serif;">
+            {{ item.submission.score }}/{{ item.task.max_score }}
+          </span>
+          {% endif %}
+        </div>
+
+        <h5 style="font-size:15px;font-weight:700;color:#1E293B;margin-bottom:8px;">{{ item.task.title }}</h5>
+        <p style="font-size:13px;color:#64748B;margin-bottom:12px;">{{ item.task.description|truncatechars:100 }}</p>
+
+        <div style="font-size:12px;color:#94A3B8;margin-bottom:12px;">
+          <div class="d-flex align-items-center gap-1 mb-1">
+            <i class="fas fa-calendar"></i>
+            Due: <strong style="color:{% if item.task.is_overdue %}#EF4444{% else %}#1E293B{% endif %};">
+              {{ item.task.due_date|date:"M d, Y g:i A" }}
+            </strong>
+          </div>
+          <div class="d-flex align-items-center gap-1">
+            <i class="fas fa-star"></i> Max Score: {{ item.task.max_score }} pts
+          </div>
+        </div>
+
+        {% if item.task.attachment %}
+        <a href="{{ item.task.attachment.url }}" class="btn btn-sm btn-outline-secondary mb-2" target="_blank">
+          <i class="fas fa-paperclip me-1"></i>Attachment
+        </a>
+        {% endif %}
+
+        <a href="{% url 'students:task_detail' item.task.id %}" class="btn btn-sm btn-primary w-100 mt-1">
+          {% if item.submission %}
+          <i class="fas fa-eye me-1"></i>View Submission
+          {% else %}
+          <i class="fas fa-upload me-1"></i>Submit Task
+          {% endif %}
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state" style="padding:80px;">
+    <i class="fas fa-tasks"></i>
+    <h5>No tasks found</h5>
+    <p style="color:#94A3B8;">
+      {% if filter_status == 'all' %}
+      Your supervisor hasn't posted any tasks yet.
+      {% else %}
+      No tasks with this filter.
+      {% endif %}
+    </p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

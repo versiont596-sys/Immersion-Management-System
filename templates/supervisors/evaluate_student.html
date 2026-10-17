@@ -1,0 +1,94 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% load model_extras %}
+{% block title %}Evaluate Student{% endblock %}
+{% block page_title %}Student Evaluation{% endblock %}
+{% block page_subtitle %}{{ student.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card mb-3" style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);">
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-3">
+          <div class="avatar avatar-lg">{{ student.user.first_name|first }}{{ student.user.last_name|first }}</div>
+          <div>
+            <div style="font-size:20px;font-weight:700;color:#1E3A8A;font-family:'Poppins',sans-serif;">{{ student.user.get_full_name }}</div>
+            <div style="font-size:13px;color:#2563EB;">{{ student.strand }} | {{ student.section }} | ID: {{ student.student_id }}</div>
+          </div>
+          {% if evaluation.final_score %}
+          <div class="ms-auto text-center">
+            <div style="font-size:36px;font-weight:800;color:#1E3A8A;font-family:'Poppins',sans-serif;line-height:1;">{{ evaluation.final_score }}</div>
+            <div style="font-size:12px;color:#2563EB;">Current Score</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="fas fa-clipboard-check" style="color:#10B981;"></i><h5>Evaluation Rubric</h5></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="alert alert-info mb-4" style="font-size:13px;">
+            <i class="fas fa-info-circle me-1"></i>
+            Rate each criterion from <strong>0 to 100</strong>. The final score is the average of all criteria.
+          </div>
+
+          {% for field_name, label in criteria_fields %}
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label mb-0">{{ label }}</label>
+              <span id="{{ field_name }}_display" style="font-size:16px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">
+                {{ evaluation|getattr:field_name|default:0 }}
+              </span>
+            </div>
+            <input type="range" class="form-range" name="{{ field_name }}" id="{{ field_name }}"
+                   min="0" max="100" value="{{ evaluation|getattr:field_name|default:0 }}"
+                   oninput="document.getElementById('{{ field_name }}_display').textContent = this.value"/>
+            <div class="d-flex justify-content-between" style="font-size:11px;color:#94A3B8;margin-top:2px;">
+              <span>Poor (0)</span><span>Average (50)</span><span>Excellent (100)</span>
+            </div>
+          </div>
+          {% empty %}
+          <!-- No evaluation criteria configured -->
+          {% endfor %}
+
+          <!-- Direct criteria fields (always show) -->
+          <div class="mb-4"><div class="d-flex justify-content-between mb-1"><label class="form-label mb-0">Punctuality</label><span id="p_disp" style="font-size:16px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ evaluation.punctuality }}</span></div><input type="range" class="form-range" name="punctuality" min="0" max="100" value="{{ evaluation.punctuality }}" oninput="p_disp.textContent=this.value"/></div>
+          <div class="mb-4"><div class="d-flex justify-content-between mb-1"><label class="form-label mb-0">Attendance</label><span id="a_disp" style="font-size:16px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ evaluation.attendance }}</span></div><input type="range" class="form-range" name="attendance" min="0" max="100" value="{{ evaluation.attendance }}" oninput="a_disp.textContent=this.value"/></div>
+          <div class="mb-4"><div class="d-flex justify-content-between mb-1"><label class="form-label mb-0">Work Quality</label><span id="wq_disp" style="font-size:16px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ evaluation.work_quality }}</span></div><input type="range" class="form-range" name="work_quality" min="0" max="100" value="{{ evaluation.work_quality }}" oninput="wq_disp.textContent=this.value"/></div>
+          <div class="mb-4"><div class="d-flex justify-content-between mb-1"><label class="form-label mb-0">Professionalism</label><span id="pr_disp" style="font-size:16px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ evaluation.professionalism }}</span></div><input type="range" class="form-range" name="professionalism" min="0" max="100" value="{{ evaluation.professionalism }}" oninput="pr_disp.textContent=this.value"/></div>
+          <div class="mb-4"><div class="d-flex justify-content-between mb-1"><label class="form-label mb-0">Communication</label><span id="c_disp" style="font-size:16px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ evaluation.communication }}</span></div><input type="range" class="form-range" name="communication" min="0" max="100" value="{{ evaluation.communication }}" oninput="c_disp.textContent=this.value"/></div>
+          <div class="mb-4"><div class="d-flex justify-content-between mb-1"><label class="form-label mb-0">Teamwork</label><span id="tw_disp" style="font-size:16px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ evaluation.teamwork }}</span></div><input type="range" class="form-range" name="teamwork" min="0" max="100" value="{{ evaluation.teamwork }}" oninput="tw_disp.textContent=this.value"/></div>
+          <div class="mb-4"><div class="d-flex justify-content-between mb-1"><label class="form-label mb-0">Initiative</label><span id="i_disp" style="font-size:16px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ evaluation.initiative }}</span></div><input type="range" class="form-range" name="initiative" min="0" max="100" value="{{ evaluation.initiative }}" oninput="i_disp.textContent=this.value"/></div>
+
+          <hr style="border-color:#E2E8F0;margin:24px 0;">
+          <div class="mb-3">
+            <label class="form-label">Remarks</label>
+            <textarea name="remarks" class="form-control" rows="3" placeholder="Overall remarks about the student's immersion performance…">{{ evaluation.remarks|default:'' }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Recommendation</label>
+            <textarea name="recommendation" class="form-control" rows="2" placeholder="Your recommendation for this student…">{{ evaluation.recommendation|default:'' }}</textarea>
+          </div>
+          <div class="mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="is_completed" id="is_completed" {% if evaluation.is_completed %}checked{% endif %}>
+              <label class="form-check-label" for="is_completed">
+                <strong>Mark evaluation as complete</strong> (student will see final grade)
+              </label>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+              <i class="fas fa-save me-1"></i>Save Evaluation
+            </button>
+            <a href="{% url 'supervisors:evaluations' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

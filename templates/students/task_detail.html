@@ -1,0 +1,168 @@
+{% extends 'students/base_student.html' %}
+{% block title %}{{ task.title }}{% endblock %}
+{% block page_title %}Task Detail{% endblock %}
+{% block page_subtitle %}{{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <!-- TASK INFO -->
+  <div class="col-lg-7">
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="fas fa-clipboard-list" style="color:#2563EB;"></i>
+        <h5>Task Details</h5>
+        {% if task.is_overdue %}
+        <span class="badge badge-danger ms-auto">Overdue</span>
+        {% else %}
+        <span class="badge badge-success ms-auto">Open</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <h3 style="font-size:22px;font-weight:700;color:#1E293B;font-family:'Poppins',sans-serif;margin-bottom:12px;">
+          {{ task.title }}
+        </h3>
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <div style="font-size:12px;color:#94A3B8;margin-bottom:3px;">Due Date</div>
+            <div style="font-size:14px;font-weight:600;color:{% if task.is_overdue %}#EF4444{% else %}#1E293B{% endif %};">
+              {{ task.due_date|date:"F d, Y" }}<br>
+              <span style="font-weight:400;font-size:13px;">{{ task.due_date|date:"g:i A" }}</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div style="font-size:12px;color:#94A3B8;margin-bottom:3px;">Max Score</div>
+            <div style="font-size:14px;font-weight:600;color:#1E293B;">{{ task.max_score }} points</div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div style="font-size:12px;color:#94A3B8;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.8px;">Description</div>
+          <p style="font-size:14px;color:#374151;line-height:1.7;">{{ task.description }}</p>
+        </div>
+
+        {% if task.instructions %}
+        <div class="mb-4">
+          <div style="font-size:12px;color:#94A3B8;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.8px;">Instructions</div>
+          <div style="font-size:14px;color:#374151;line-height:1.7;background:#F8FAFF;padding:16px;border-radius:10px;border-left:3px solid #2563EB;">
+            {{ task.instructions }}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if task.attachment %}
+        <a href="{{ task.attachment.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-download me-1"></i>Download Attachment
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMISSION PANEL -->
+  <div class="col-lg-5">
+    {% if submission %}
+    <!-- EXISTING SUBMISSION -->
+    <div class="card mb-3" style="border-top:3px solid
+      {% if submission.status == 'graded' %}#10B981
+      {% elif submission.status == 'late' %}#F59E0B
+      {% else %}#2563EB{% endif %};">
+      <div class="card-header">
+        <i class="fas fa-check-circle" style="color:#10B981;"></i>
+        <h5>Your Submission</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-3 mb-3 p-3" style="background:#F8FAFF;border-radius:10px;">
+          <i class="fas fa-file-alt" style="font-size:24px;color:#2563EB;"></i>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#1E293B;">{{ submission.file.name|slice:"12:" }}</div>
+            <div style="font-size:12px;color:#64748B;">{{ submission.submitted_at|date:"M d, Y g:i A" }}</div>
+          </div>
+          <a href="{{ submission.file.url }}" class="btn btn-sm btn-outline-primary ms-auto" target="_blank">
+            <i class="fas fa-download"></i>
+          </a>
+        </div>
+
+        <div class="mb-3">
+          <div style="font-size:12px;color:#94A3B8;margin-bottom:3px;">Status</div>
+          <span class="badge badge-
+            {% if submission.status == 'graded' %}success
+            {% elif submission.status == 'late' %}warning
+            {% elif submission.status == 'returned' %}danger
+            {% else %}info{% endif %}">
+            {{ submission.get_status_display }}
+          </span>
+        </div>
+
+        {% if submission.score is not None %}
+        <div class="mb-3" style="text-align:center;padding:20px;background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border-radius:12px;">
+          <div style="font-size:13px;color:#059669;font-weight:600;margin-bottom:4px;">Your Score</div>
+          <div style="font-size:40px;font-weight:800;color:#064E3B;font-family:'Poppins',sans-serif;line-height:1;">
+            {{ submission.score }}
+          </div>
+          <div style="font-size:14px;color:#059669;">out of {{ task.max_score }} points</div>
+        </div>
+        {% endif %}
+
+        {% if submission.feedback %}
+        <div>
+          <div style="font-size:12px;color:#94A3B8;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.8px;">Supervisor Feedback</div>
+          <div style="font-size:14px;color:#374151;background:#FFFBEB;padding:14px;border-radius:10px;border-left:3px solid #F59E0B;line-height:1.6;">
+            {{ submission.feedback }}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if submission.comment %}
+        <div class="mt-3">
+          <div style="font-size:12px;color:#94A3B8;margin-bottom:6px;">Your Comment</div>
+          <p style="font-size:13px;color:#64748B;">{{ submission.comment }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <a href="{% url 'students:tasks' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i>Back to Tasks
+    </a>
+    {% else %}
+    <!-- SUBMIT FORM -->
+    <div class="card" style="{% if task.is_overdue %}border-color:#FCA5A5;{% endif %}">
+      <div class="card-header">
+        <i class="fas fa-upload" style="color:{% if task.is_overdue %}#EF4444{% else %}#2563EB{% endif %};"></i>
+        <h5>{% if task.is_overdue %}Late Submission{% else %}Submit Task{% endif %}</h5>
+      </div>
+      <div class="card-body">
+        {% if task.is_overdue %}
+        <div class="alert alert-warning mb-3">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          This task is past due. Your submission will be marked as <strong>Late</strong>.
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Upload File *</label>
+            <input type="file" name="file" class="form-control" required accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip"/>
+            <div style="font-size:12px;color:#94A3B8;margin-top:4px;">
+              Accepted: PDF, Word, PowerPoint, Images, ZIP (max 10MB)
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Comment (optional)</label>
+            <textarea name="comment" class="form-control" rows="3" placeholder="Add a note to your supervisor…"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-paper-plane me-1"></i>Submit Task
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="mt-3">
+      <a href="{% url 'students:tasks' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Back to Tasks
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

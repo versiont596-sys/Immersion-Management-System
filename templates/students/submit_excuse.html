@@ -1,0 +1,92 @@
+{% extends 'students/base_student.html' %}
+
+{% block title %}Submit Excuse{% endblock %}
+{% block page_title %}Submit Excuse{% endblock %}
+{% block page_subtitle %}Notify your supervisor if you cannot attend or complete attendance for a valid reason{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5>Excuse Request Form</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Date of Absence</label>
+            <input type="date" name="date" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Reason for Excuse</label>
+            <textarea name="reason" class="form-control" rows="4" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Supporting Document (optional)</label>
+            <input type="file" name="supporting_document" class="form-control" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Additional Notes</label>
+            <textarea name="notes" class="form-control" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane me-2"></i>Send Excuse Request
+          </button>
+          <a href="{% url 'students:attendance' %}" class="btn btn-outline-secondary ms-2">Back to Attendance</a>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5>Submitted Requests</h5>
+      </div>
+      <div class="card-body">
+        {% if existing_requests %}
+          <div class="table-responsive">
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Supervisor Comment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for request in existing_requests %}
+                <tr>
+                  <td>{{ request.date|date:"M d, Y" }}</td>
+                  <td>
+                    <span class="badge bg-{% if request.status == 'approved' %}success{% elif request.status == 'rejected' %}danger{% else %}warning text-dark{% endif %}">
+                      {{ request.get_status_display }}
+                    </span>
+                  </td>
+                  <td>{{ request.submitted_at|date:"M d, Y g:i A" }}</td>
+                  <td>
+                  {% if request.supervisor_comment %}
+                    <span title="{{ request.supervisor_comment }}">{{ request.supervisor_comment|truncatechars:80 }}</span>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-state text-center py-5">
+            <i class="fas fa-inbox" style="font-size:32px;"></i>
+            <h5 class="mt-3">No excuse requests yet</h5>
+            <p class="text-muted">Your submitted excuse request history will appear here.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

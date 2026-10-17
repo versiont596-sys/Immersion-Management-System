@@ -1,0 +1,37 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Notifications{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><h5>Notifications</h5></div>
+  <div class="card-body p-0">
+    {% if notifications %}
+      {% for notif in notifications %}
+      <div style="padding:18px 20px; border-bottom:1px solid #E2E8F0;">
+        <div class="d-flex align-items-start gap-3">
+          <div style="width:38px; height:38px; border-radius:12px; background:#EFF6FF; display:flex; align-items:center; justify-content:center;">
+            <i class="fas fa-bell" style="color:#2563EB;"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div style="font-size:15px;font-weight:600;color:#1E293B;">{{ notif.title }}</div>
+            <div style="font-size:13px;color:#64748B;margin-top:4px;">{{ notif.message }}</div>
+            {% if notif.link %}
+            <a href="{{ notif.link }}" class="text-primary" style="font-size:12px;">Open details</a>
+            {% endif %}
+            <div style="font-size:11px;color:#94A3B8;margin-top:8px;">
+              {{ notif.created_at|timesince }} ago
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding:60px; text-align:center;">
+        <i class="fas fa-bell fa-2x" style="color:#94A3B8;"></i>
+        <h5>No notifications yet</h5>
+        <p style="color:#94A3B8;">You will see your notifications here when there are updates.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

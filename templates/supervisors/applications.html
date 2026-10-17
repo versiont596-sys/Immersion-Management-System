@@ -1,0 +1,41 @@
+{% extends 'supervisors/base_supervisor.html' %}
+
+{% block content %}
+<div class="page-header mb-4">
+  <div>
+    <h1 class="h3">Student Applications</h1>
+    <p class="text-muted">You may review the pending applications assigned to you. Final approval is performed by the administrator.</p>
+  </div>
+</div>
+
+{% if students %}
+<table class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>Student ID</th>
+      <th>Strand</th>
+      <th>Status</th>
+      <th class="text-end">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for student in students %}
+    <tr>
+      <td>{{ student.user.get_full_name }}</td>
+      <td>{{ student.student_id }}</td>
+      <td>{{ student.get_strand_display }}</td>
+      <td>{{ student.get_application_status_display }}</td>
+      <td class="text-end">
+        <span class="text-muted" style="font-size:13px;">Pending administrator approval</span>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">
+  There are no pending applications at the moment.
+</div>
+{% endif %}
+{% endblock %}

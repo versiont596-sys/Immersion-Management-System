@@ -1,0 +1,89 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Group Details{% endblock %}
+{% block page_title %}Group Details{% endblock %}
+{% block page_subtitle %}View immersion group students and assignment details{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <h5>{{ group.name }}</h5>
+    <div style="font-size:13px;color:#64748B;">
+      {{ group.company.name }} · {{ group.school_year }} · {% if group.is_open %}Open{% else %}Closed{% endif %}
+    </div>
+  </div>
+  <div class="text-end">
+    <a href="{% url 'dean:groups' %}" class="btn btn-outline-secondary btn-sm">Back to Groups</a>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body p-4">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <div class="text-uppercase text-muted mb-2">Company</div>
+        <div>{{ group.company.name }}</div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="text-uppercase text-muted mb-2">Supervisor</div>
+        <div>{% if group.supervisor %}{{ group.supervisor.get_full_name }}{% else %}—{% endif %}</div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="text-uppercase text-muted mb-2">Schedule</div>
+        <div>{{ group.start_date|date:"M d, Y" }} – {{ group.end_date|date:"M d, Y" }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <div>
+      <i class="fas fa-users" style="color:#2563EB;"></i>
+      <h5 class="d-inline-block ms-2">Assigned Students</h5>
+      <span class="badge badge-info ms-2">{{ students.count }} active</span>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Student ID</th>
+          <th>Strand</th>
+          <th>Section</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for assign in students %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar">{{ assign.student.user.first_name|first }}{{ assign.student.user.last_name|first }}</div>
+              <div>
+                <div style="font-size:14px;font-weight:600;">{{ assign.student.user.get_full_name }}</div>
+                <div style="font-size:12px;color:#64748B;">{{ assign.student.user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:13px;color:#64748B;font-family:monospace;">{{ assign.student.student_id }}</td>
+          <td><span class="badge badge-info">{{ assign.student.strand }}</span></td>
+          <td style="font-size:13px;">{{ assign.student.section }}</td>
+          <td>
+            <span class="badge {% if assign.status == 'active' %}badge-success{% else %}badge-warning{% endif %}">{{ assign.get_status_display }}</span>
+          </td>
+          <td style="font-size:12px;color:#64748B;">{{ assign.joined_at|date:'M d, Y' }}</td>
+          <td>
+            <a href="{% url 'dean:student_detail' assign.student.id %}" class="btn btn-sm btn-outline-primary">Details</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state"><i class="fas fa-user-friends"></i><h5>No students assigned yet</h5></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

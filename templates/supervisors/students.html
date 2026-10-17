@@ -1,0 +1,60 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}My Students{% endblock %}
+{% block page_title %}Assigned Students{% endblock %}
+{% block page_subtitle %}Students in your immersion groups{% endblock %}
+{% block content %}
+<div class="mb-3">
+  <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
+    <input type="text" name="q" value="{{ search }}" class="form-control" style="max-width:280px;" placeholder="Search student name…"/>
+    <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search me-1"></i>Search</button>
+    <a href="{% url 'supervisors:students' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
+  </form>
+</div>
+<div class="mb-3">
+  <div class="btn-group flex-wrap" role="group" aria-label="Strand filter">
+    <a href="{% url 'supervisors:students' %}" class="btn btn-sm {% if not strand %}btn-primary{% else %}btn-outline-primary{% endif %}">All Strands</a>
+    {% for value, label in strand_choices %}
+    <a href="?strand={{ value }}{% if search %}&q={{ search|urlencode }}{% endif %}" class="btn btn-sm {% if strand == value %}btn-primary{% else %}btn-outline-primary{% endif %}">{{ value }}</a>
+    {% endfor %}
+  </div>
+</div>
+<div class="row g-3">
+  {% for student in students %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="avatar avatar-lg">{{ student.user.first_name|first }}{{ student.user.last_name|first }}</div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#1E293B;">{{ student.user.get_full_name }}</div>
+            <div style="font-size:12px;color:#64748B;">{{ student.strand }} | {{ student.section }}</div>
+            <div style="font-size:12px;color:#94A3B8;">ID: {{ student.student_id }}</div>
+            <div style="font-size:12px;color:#0F766E;">Company: {% with assignment=student.get_active_assignment %}{% if assignment %}{{ assignment.group.company.name }}{% else %}<span style="color:#CBD5E1;">Not assigned</span>{% endif %}{% endwith %}</div>
+          </div>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-4 text-center" style="background:#F8FAFF;border-radius:8px;padding:10px;">
+            <div style="font-size:18px;font-weight:700;color:#2563EB;">{{ student.get_task_stats.submitted }}</div>
+            <div style="font-size:10px;color:#64748B;">Submitted</div>
+          </div>
+          <div class="col-4 text-center" style="background:#F8FAFF;border-radius:8px;padding:10px;">
+            <div style="font-size:18px;font-weight:700;color:#10B981;">{{ student.get_total_hours|floatformat:0 }}</div>
+            <div style="font-size:10px;color:#64748B;">Hours</div>
+          </div>
+          <div class="col-4 text-center" style="background:#F8FAFF;border-radius:8px;padding:10px;">
+            <div style="font-size:18px;font-weight:700;color:#F59E0B;">{{ student.get_task_stats.graded }}</div>
+            <div style="font-size:10px;color:#64748B;">Graded</div>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{% url 'supervisors:student_detail' student.id %}" class="btn btn-sm btn-primary flex-grow-1">View Profile</a>
+          <a href="{% url 'supervisors:evaluate_student' student.id %}" class="btn btn-sm btn-outline-secondary flex-grow-1">Evaluate</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="card"><div class="empty-state" style="padding:80px;"><i class="fas fa-users"></i><h5>No students assigned</h5></div></div></div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Grade Submission{% endblock %}
+{% block page_title %}Grade Submission{% endblock %}
+{% block page_subtitle %}{{ submission.task.title }} — {{ submission.student.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-file-alt" style="color:#2563EB;"></i><h5>Student Submission</h5></div>
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="avatar avatar-lg">{{ submission.student.user.first_name|first }}{{ submission.student.user.last_name|first }}</div>
+          <div>
+            <div style="font-size:18px;font-weight:700;color:#1E293B;font-family:'Poppins',sans-serif;">{{ submission.student.user.get_full_name }}</div>
+            <div style="font-size:13px;color:#64748B;">{{ submission.student.strand }} | {{ submission.student.section }}</div>
+          </div>
+        </div>
+        <div class="mb-3"><div style="font-size:12px;color:#94A3B8;margin-bottom:3px;">Task</div><div style="font-size:14px;font-weight:600;">{{ submission.task.title }}</div></div>
+        <div class="mb-3"><div style="font-size:12px;color:#94A3B8;margin-bottom:3px;">Submitted At</div><div style="font-size:14px;">{{ submission.submitted_at|date:"F d, Y g:i A" }}</div></div>
+        <div class="mb-4"><div style="font-size:12px;color:#94A3B8;margin-bottom:3px;">Status</div>
+          <span class="badge badge-{% if submission.status == 'graded' %}success{% elif submission.status == 'late' %}warning{% else %}info{% endif %}">{{ submission.get_status_display }}</span>
+        </div>
+        {% if submission.comment %}
+        <div class="mb-4">
+          <div style="font-size:12px;color:#94A3B8;margin-bottom:6px;">Student's Comment</div>
+          <div style="background:#F8FAFF;padding:14px;border-radius:10px;font-size:14px;color:#374151;">{{ submission.comment }}</div>
+        </div>
+        {% endif %}
+        <a href="{{ submission.file.url }}" target="_blank" class="btn btn-outline-primary">
+          <i class="fas fa-download me-1"></i>Download Submitted File
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-star" style="color:#F59E0B;"></i><h5>Grade & Feedback</h5></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Score (out of {{ submission.task.max_score }})</label>
+            <div class="d-flex align-items-center gap-2">
+              <input type="number" name="score" class="form-control" value="{{ submission.score|default:'' }}"
+                     min="0" max="{{ submission.task.max_score }}" placeholder="e.g. 85"/>
+              <span style="color:#64748B;white-space:nowrap;">/ {{ submission.task.max_score }}</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Feedback</label>
+            <textarea name="feedback" class="form-control" rows="5" placeholder="Write your feedback for the student…">{{ submission.feedback|default:'' }}</textarea>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Update Status</label>
+            <select name="status" class="form-select">
+              <option value="graded" {% if submission.status == 'graded' %}selected{% endif %}>Graded</option>
+              <option value="returned" {% if submission.status == 'returned' %}selected{% endif %}>Return for Revision</option>
+              <option value="reviewed" {% if submission.status == 'reviewed' %}selected{% endif %}>Reviewed (no score yet)</option>
+            </select>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+              <i class="fas fa-save me-1"></i>Save Grade
+            </button>
+            <a href="{% url 'supervisors:submissions' %}" class="btn btn-outline-secondary">Back</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

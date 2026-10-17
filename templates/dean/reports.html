@@ -1,0 +1,200 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+{% block page_subtitle %}System-wide data, exports and analytics{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fas fa-user-graduate"></i></div>
+      <div><div class="stat-value">{{ total_students }}</div><div class="stat-label">Total Students</div></div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-clock"></i></div>
+      <div><div class="stat-value">{{ total_hours|floatformat:0 }}</div><div class="stat-label">Total Hours Rendered</div></div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="fas fa-file-check"></i></div>
+      <div><div class="stat-value">{{ completion_data.graded }}</div><div class="stat-label">Graded Submissions</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- STRAND DISTRIBUTION CHART -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-chart-pie" style="color:#7C3AED;"></i>
+        <h5>Students by Strand</h5>
+      </div>
+      <div class="card-body" style="height:300px;display:flex;align-items:center;justify-content:center;">
+        <canvas id="strandChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMISSION STATUS CHART -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-chart-bar" style="color:#2563EB;"></i>
+        <h5>Task Completion Status</h5>
+      </div>
+      <div class="card-body" style="height:300px;display:flex;align-items:center;justify-content:center;">
+        <canvas id="completionChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPANY DISTRIBUTION -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-building" style="color:#10B981;"></i>
+        <h5>Students per Company</h5>
+      </div>
+      <div class="card-body" style="height:300px;">
+        <canvas id="companyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT BUTTONS -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-download" style="color:#F59E0B;"></i>
+        <h5>Export Reports</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="card" style="border:1.5px solid #E2E8F0;cursor:pointer;" onmouseover="this.style.borderColor='#2563EB'" onmouseout="this.style.borderColor='#E2E8F0'">
+              <div class="card-body text-center py-4">
+                <i class="fas fa-users" style="font-size:28px;color:#2563EB;margin-bottom:10px;display:block;"></i>
+                <div style="font-size:14px;font-weight:600;color:#1E293B;">Student List</div>
+                <div style="font-size:12px;color:#64748B;margin-top:4px;">All students with details</div>
+                <div class="d-flex gap-1 justify-content-center mt-3">
+                  <span class="badge badge-info">CSV</span>
+                  <span class="badge badge-danger">PDF</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card" style="border:1.5px solid #E2E8F0;cursor:pointer;" onmouseover="this.style.borderColor='#10B981'" onmouseout="this.style.borderColor='#E2E8F0'">
+              <div class="card-body text-center py-4">
+                <i class="fas fa-calendar-check" style="font-size:28px;color:#10B981;margin-bottom:10px;display:block;"></i>
+                <div style="font-size:14px;font-weight:600;color:#1E293B;">Attendance Report</div>
+                <div style="font-size:12px;color:#64748B;margin-top:4px;">All attendance records</div>
+                <div class="d-flex gap-1 justify-content-center mt-3">
+                  <span class="badge badge-success">Excel</span>
+                  <span class="badge badge-danger">PDF</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card" style="border:1.5px solid #E2E8F0;cursor:pointer;" onmouseover="this.style.borderColor='#F59E0B'" onmouseout="this.style.borderColor='#E2E8F0'">
+              <div class="card-body text-center py-4">
+                <i class="fas fa-star" style="font-size:28px;color:#F59E0B;margin-bottom:10px;display:block;"></i>
+                <div style="font-size:14px;font-weight:600;color:#1E293B;">Evaluation Report</div>
+                <div style="font-size:12px;color:#64748B;margin-top:4px;">Scores and grades</div>
+                <div class="d-flex gap-1 justify-content-center mt-3">
+                  <span class="badge badge-warning">Excel</span>
+                  <span class="badge badge-danger">PDF</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card" style="border:1.5px solid #E2E8F0;cursor:pointer;" onmouseover="this.style.borderColor='#7C3AED'" onmouseout="this.style.borderColor='#E2E8F0'">
+              <div class="card-body text-center py-4">
+                <i class="fas fa-chart-line" style="font-size:28px;color:#7C3AED;margin-bottom:10px;display:block;"></i>
+                <div style="font-size:14px;font-weight:600;color:#1E293B;">Completion Summary</div>
+                <div style="font-size:12px;color:#64748B;margin-top:4px;">Immersion completion</div>
+                <div class="d-flex gap-1 justify-content-center mt-3">
+                  <span class="badge badge-purple">Excel</span>
+                  <span class="badge badge-danger">PDF</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-info mt-3" style="font-size:13px;">
+          <i class="fas fa-info-circle me-1"></i>
+          Export functionality requires <code>reportlab</code> and <code>openpyxl</code> packages. Install with:<br>
+          <code>pip install reportlab openpyxl</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const strandData = {{ strand_data|safe }};
+const companyData = {{ company_data|safe }};
+const completionData = {{ completion_data|safe }};
+
+// Strand Chart
+new Chart(document.getElementById('strandChart'), {
+  type: 'doughnut',
+  data: {
+    labels: strandData.map(d => d.strand),
+    datasets: [{
+      data: strandData.map(d => d.count),
+      backgroundColor: ['#2563EB','#10B981','#F59E0B','#EF4444','#7C3AED','#0D9488','#EC4899','#6B7280'],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+});
+
+// Completion Chart
+new Chart(document.getElementById('completionChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Submitted', 'Graded', 'Pending'],
+    datasets: [{
+      label: 'Tasks',
+      data: [completionData.submitted, completionData.graded, completionData.pending],
+      backgroundColor: ['#2563EB', '#10B981', '#F59E0B'],
+      borderRadius: 8
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+  }
+});
+
+// Company Chart
+new Chart(document.getElementById('companyChart'), {
+  type: 'bar',
+  data: {
+    labels: companyData.map(d => d.name.length > 20 ? d.name.substring(0,20)+'…' : d.name),
+    datasets: [{
+      label: 'Students',
+      data: companyData.map(d => d.student_count),
+      backgroundColor: '#10B981',
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { beginAtZero: true, grid: { color: '#F1F5F9' } }, y: { grid: { display: false } } }
+  }
+});
+</script>
+{% endblock %}

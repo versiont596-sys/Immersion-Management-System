@@ -1,0 +1,83 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Supervisors{% endblock %}
+{% block page_title %}Supervisor Management{% endblock %}
+{% block page_subtitle %}Manage company supervisor accounts{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-3">
+  <a href="{% url 'dean:supervisor_create' %}" class="btn btn-primary">
+    <i class="fas fa-user-plus me-1"></i>Create Supervisor
+  </a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Supervisor</th>
+          <th>Company</th>
+          <th>Position</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sup in supervisors %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar">{{ sup.user.first_name|first }}{{ sup.user.last_name|first }}</div>
+              <div>
+                <div style="font-size:14px;font-weight:600;">{{ sup.user.get_full_name }}</div>
+                <div style="font-size:12px;color:#64748B;">{{ sup.user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            {% if sup.company %}
+            <span class="badge badge-info">{{ sup.company.name|truncatechars:25 }}</span>
+            {% else %}
+            <span style="color:#CBD5E1;font-size:13px;">—</span>
+            {% endif %}
+          </td>
+          <td style="font-size:13px;">{{ sup.position|default:"—" }}</td>
+          <td style="font-size:13px;">{{ sup.contact_number|default:"—" }}</td>
+          <td>
+            {% if sup.user.is_active %}
+            <span class="badge badge-success">Active</span>
+            {% else %}
+            <span class="badge badge-danger">Inactive</span>
+            {% endif %}
+          </td>
+          <td style="font-size:12px;color:#64748B;">{{ sup.created_at|date:"M d, Y" }}</td>
+          <td>
+            <a href="{% url 'dean:supervisor_edit' sup.id %}" class="btn btn-sm btn-outline-primary btn-icon" title="Edit">
+              <i class="fas fa-edit"></i>
+            </a>
+            {% if sup.company %}
+            <form method="post" action="{% url 'dean:supervisor_remove_company' sup.id %}" style="display:inline;" onsubmit="return confirm('Remove the company assignment from this supervisor?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-warning btn-icon" title="Unassign Company">
+                <i class="fas fa-unlink"></i>
+              </button>
+            </form>
+            {% endif %}
+            <form method="post" action="{% url 'dean:supervisor_delete' sup.id %}" style="display:inline;" onsubmit="return confirm('Delete this supervisor account?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger btn-icon" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state"><i class="fas fa-user-tie"></i><h5>No supervisors yet</h5></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

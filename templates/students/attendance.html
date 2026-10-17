@@ -1,0 +1,121 @@
+{% extends 'students/base_student.html' %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}My Attendance{% endblock %}
+{% block page_subtitle %}View your daily time record and hours{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-clock"></i></div>
+      <div><div class="stat-value">{{ total_hours|floatformat:1 }}</div><div class="stat-label">Total Time/Hours</div></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fas fa-check-circle"></i></div>
+      <div><div class="stat-value">{{ present }}</div><div class="stat-label">Present Days</div></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+      <div><div class="stat-value">{{ absent }}</div><div class="stat-label">Absent Days</div></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="fas fa-hourglass-half"></i></div>
+      <div><div class="stat-value">{{ late }}</div><div class="stat-label">Late Days</div></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon teal"><i class="fas fa-user-check"></i></div>
+      <div><div class="stat-value">{{ excused }}</div><div class="stat-label">Excused</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <div>
+      <i class="fas fa-calendar-alt" style="color:#2563EB;"></i>
+      <h5 class="d-inline">Attendance Records</h5>
+      <span class="badge badge-secondary ms-2">{{ records|length }} records</span>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'students:submit_excuse' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-envelope-open-text me-2"></i>Submit Excuse
+      </a>
+      <a href="{% url 'students:record_attendance' %}" class="btn btn-primary btn-sm">
+        <i class="fas fa-clock me-2"></i>Record Attendance
+      </a>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time/Hours In</th>
+          <th>Break Out</th>
+          <th>Break In</th>
+          <th>Time/Hours Out</th>
+          <th>Hours</th>
+          <th>Status</th>
+          <th>Approval</th>
+          <th>Verified By</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records %}
+        <tr>
+          <td style="font-weight:600;color:#1E293B;">{{ record.date|date:"d M Y" }}</td>
+          <td style="color:#64748B;">{{ record.time_in|time:"g:i A"|default:"—" }}</td>
+          <td style="color:#64748B;">{{ record.break_out|time:"g:i A"|default:"—" }}</td>
+          <td style="color:#64748B;">{{ record.break_in|time:"g:i A"|default:"—" }}</td>
+          <td style="color:#64748B;">{{ record.time_out|time:"g:i A"|default:"—" }}</td>
+          <td>
+            <span style="font-weight:600;color:#2563EB;">{{ record.hours_rendered }}h</span>
+          </td>
+          <td>
+            <span class="badge badge-
+              {% if record.status == 'present' %}success
+              {% elif record.status == 'absent' %}danger
+              {% elif record.status == 'late' %}warning
+              {% elif record.status == 'excused' %}info
+              {% else %}secondary{% endif %}">
+              {{ record.get_status_display }}
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-
+              {% if record.approval_status == 'approved' %}success
+              {% elif record.approval_status == 'rejected' %}danger
+              {% elif record.approval_status == 'pending' %}warning{% else %}secondary{% endif %}">
+              {{ record.get_approval_status_display|default:record.approval_status|title }}
+            </span>
+          </td>
+          <td style="font-size:13px;color:#64748B;">
+            {{ record.verified_by.get_full_name|default:"—" }}
+          </td>
+          <td style="font-size:13px;color:#94A3B8;">{{ record.remarks|default:"—"|truncatechars:30 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="10">
+            <div class="empty-state">
+              <i class="fas fa-calendar"></i>
+              <h5>No attendance records yet</h5>
+              <p>Get started by recording your attendance actions using the Record Attendance page.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

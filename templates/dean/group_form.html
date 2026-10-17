@@ -1,0 +1,101 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Create Group{% endblock %}
+{% block page_title %}Create Immersion Group{% endblock %}
+{% block page_subtitle %}Set up a new immersion class group{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-layer-group" style="color:#2563EB;"></i>
+        <h5>Group Details</h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Group Name *</label>
+              <input type="text" name="name" class="form-control" required placeholder="e.g. STEM - ABC Corp Group 1" value="{{ form_data.name|default:'' }}"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Company *</label>
+              <select name="company" id="company-select" class="form-select" required>
+                <option value="">— Select Company —</option>
+                {% for c in companies %}
+                <option value="{{ c.id }}" {% if form_data.company|stringformat:'s' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Supervisor</label>
+              <select name="supervisor" id="supervisor-select" class="form-select">
+                <option value="">— Select Supervisor —</option>
+                {% for s in supervisors %}
+                <option value="{{ s.user.id }}" data-company-id="{{ s.company.id }}" {% if form_data.supervisor|stringformat:'s' == s.user.id|stringformat:'s' %}selected{% endif %}>
+                  {{ s.user.get_full_name }} — {{ s.company.name|default:"No Company" }}
+                </option>
+                {% endfor %}
+              </select>
+              <div class="form-text text-muted">Only supervisors assigned to the selected company and without another group can be chosen.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">School Year</label>
+              <input type="text" name="school_year" class="form-control" value="{{ form_data.school_year|default:'2024-2025' }}" placeholder="2024-2025"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Open Enrollment</label>
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="is_open" id="is_open" {% if form_data.is_open != '' %}{% if form_data.is_open == 'on' %}checked{% endif %}{% else %}checked{% endif %}>
+                <label class="form-check-label" for="is_open">Allow students to join</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Start Date *</label>
+              <input type="date" name="start_date" class="form-control" required value="{{ form_data.start_date|default:'' }}"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">End Date *</label>
+              <input type="date" name="end_date" class="form-control" required value="{{ form_data.end_date|default:'' }}"/>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i>Create Group
+            </button>
+            <a href="{% url 'dean:groups' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  (function() {
+    const companySelect = document.getElementById('company-select');
+    const supervisorSelect = document.getElementById('supervisor-select');
+
+    function filterSupervisors() {
+      const selectedCompany = companySelect.value;
+      for (const option of supervisorSelect.options) {
+        if (!option.value) {
+          option.hidden = false;
+          option.disabled = false;
+          continue;
+        }
+        const optionCompany = option.dataset.companyId || '';
+        const invalid = selectedCompany && optionCompany !== selectedCompany;
+        option.hidden = invalid;
+        option.disabled = invalid;
+        if (invalid && option.selected) {
+          option.selected = false;
+        }
+      }
+    }
+
+    companySelect.addEventListener('change', filterSupervisors);
+    window.addEventListener('DOMContentLoaded', filterSupervisors);
+  })();
+</script>
+{% endblock %}

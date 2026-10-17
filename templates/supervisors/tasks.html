@@ -1,0 +1,58 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Tasks{% endblock %}
+{% block page_title %}Task Management{% endblock %}
+{% block page_subtitle %}Create and manage tasks for your students{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-3">
+  <a href="{% url 'supervisors:task_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus me-1"></i>Create Task
+  </a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr><th>Task</th><th>Group</th><th>Due Date</th><th>Max Score</th><th>Submissions</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td>
+            <div style="font-size:14px;font-weight:600;color:#1E293B;">{{ task.title }}</div>
+            <div style="font-size:12px;color:#64748B;">{{ task.description|truncatechars:60 }}</div>
+          </td>
+          <td><span class="badge badge-info">{{ task.group.name|truncatechars:20 }}</span></td>
+          <td style="font-size:13px;color:{% if task.is_overdue %}#EF4444{% else %}#64748B{% endif %};">
+            {{ task.due_date|date:"M d, Y" }}<br><small>{{ task.due_date|date:"g:i A" }}</small>
+          </td>
+          <td style="font-size:13px;font-weight:600;">{{ task.max_score }} pts</td>
+          <td><span class="badge badge-secondary">{{ task.get_submission_count }} submitted</span></td>
+          <td>
+            {% if not task.is_published %}
+            <span class="badge badge-secondary">Draft</span>
+            {% elif task.is_overdue %}
+            <span class="badge badge-danger">Overdue</span>
+            {% else %}
+            <span class="badge badge-success">Active</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'supervisors:task_edit' task.id %}" class="btn btn-sm btn-outline-primary btn-icon" title="Edit"><i class="fas fa-edit"></i></a>
+              <form method="post" action="{% url 'supervisors:task_delete' task.id %}" style="display:inline;" onsubmit="return confirm('Delete this task?')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger btn-icon" title="Delete"><i class="fas fa-trash"></i></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state"><i class="fas fa-tasks"></i><h5>No tasks yet. Create your first task!</h5></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

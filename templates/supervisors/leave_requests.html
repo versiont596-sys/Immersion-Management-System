@@ -1,0 +1,74 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Leave Requests{% endblock %}
+{% block page_title %}Leave Requests{% endblock %}
+{% block page_subtitle %}Review student leave requests and approve or decline them.{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Group</th>
+          <th>Company</th>
+          <th>Requested</th>
+          <th>Status</th>
+          <th>Reason</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for request in requests %}
+        <tr>
+          <td>{{ request.student.user.get_full_name }}</td>
+          <td>
+            {% if request.group %}
+              {{ request.group.name }}
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+          <td>
+            {% if request.group %}
+              {{ request.group.company.name }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>{{ request.submitted_at|date:'M d, Y H:i' }}</td>
+          <td>
+            {% if request.status == 'pending' %}
+              <span class="badge badge-warning">{{ request.get_status_display }}</span>
+            {% elif request.status == 'approved' %}
+              <span class="badge badge-success">{{ request.get_status_display }}</span>
+            {% else %}
+              <span class="badge badge-danger">{{ request.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td style="max-width:250px; white-space:pre-wrap;">{{ request.reason|default:'—' }}</td>
+          <td>
+            {% if request.status == 'pending' %}
+            <form method="post" action="{% url 'supervisors:approve_leave_request' request.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-success mb-1">Approve</button>
+            </form>
+            <form method="post" action="{% url 'supervisors:reject_leave_request' request.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger mb-1">Decline</button>
+            </form>
+            {% else %}
+            <span class="text-muted">No actions</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7"><div class="empty-state"><i class="fas fa-door-open"></i><h5>No leave requests yet</h5></div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

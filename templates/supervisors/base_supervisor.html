@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block sidebar_nav %}
+<span class="nav-section-title">Main</span>
+<a href="{% url 'supervisors:dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+  <i class="fas fa-th-large nav-icon"></i> Dashboard
+</a>
+
+<span class="nav-section-title">Students</span>
+<a href="{% url 'supervisors:students' %}" class="sidebar-link {% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+  <i class="fas fa-users nav-icon"></i> My Students
+</a>
+<a href="{% url 'supervisors:companies' %}" class="sidebar-link {% if request.resolver_match.url_name == 'companies' %}active{% endif %}">
+  <i class="fas fa-building nav-icon"></i> Companies
+</a>
+
+<span class="nav-section-title">Tasks</span>
+<a href="{% url 'supervisors:tasks' %}" class="sidebar-link {% if 'task' in request.resolver_match.url_name %}active{% endif %}">
+  <i class="fas fa-tasks nav-icon"></i> Task Management
+</a>
+<a href="{% url 'supervisors:submissions' %}" class="sidebar-link {% if 'submission' in request.resolver_match.url_name %}active{% endif %}">
+  <i class="fas fa-file-upload nav-icon"></i> Submissions
+  {% if pending_submissions > 0 %}
+  <span class="badge-count">{{ pending_submissions }}</span>
+  {% endif %}
+</a>
+
+<span class="nav-section-title">Monitoring</span>
+<a href="{% url 'supervisors:attendance' %}" class="sidebar-link {% if request.resolver_match.url_name == 'attendance' %}active{% endif %}">
+  <i class="fas fa-calendar-check nav-icon"></i> Attendance
+</a>
+<a href="{% url 'supervisors:requirements' %}" class="sidebar-link {% if request.resolver_match.url_name == 'requirements' %}active{% endif %}">
+  <i class="fas fa-file-alt nav-icon"></i> Requirements
+</a>
+<a href="{% url 'supervisors:journals' %}" class="sidebar-link {% if 'journal' in request.resolver_match.url_name %}active{% endif %}">
+  <i class="fas fa-book nav-icon"></i> Journals
+</a>
+<a href="{% url 'supervisors:evaluations' %}" class="sidebar-link {% if 'evaluation' in request.resolver_match.url_name %}active{% endif %}">
+  <i class="fas fa-star nav-icon"></i> Evaluations
+</a>
+<a href="{% url 'supervisors:announcements' %}" class="sidebar-link {% if 'announcement' in request.resolver_match.url_name %}active{% endif %}">
+  <i class="fas fa-bullhorn nav-icon"></i> Announcements
+</a>
+{% endblock %}
+
+{% block notif_url %}{% url 'supervisors:notifications' %}{% endblock %}
+{% block profile_url %}{% url 'supervisors:dashboard' %}{% endblock %}

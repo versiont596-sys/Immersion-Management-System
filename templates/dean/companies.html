@@ -1,0 +1,106 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Companies{% endblock %}
+{% block page_title %}Company Management{% endblock %}
+{% block page_subtitle %}Manage immersion company partners{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div></div>
+  <a href="{% url 'dean:company_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus me-1"></i>Add Company
+  </a>
+</div>
+
+<div class="row g-3">
+  {% for company in companies %}
+  <div class="col-md-6 col-xl-4 d-flex">
+    <div class="card flex-fill">
+      <div class="card-body d-flex flex-column">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="stat-icon green" style="width:48px;height:48px;font-size:20px;border-radius:12px;flex-shrink:0;">
+            <i class="fas fa-building"></i>
+          </div>
+          <div class="d-flex flex-column justify-content-center">
+            <div style="font-size:16px;font-weight:700;color:#1E293B;font-family:'Poppins',sans-serif;">{{ company.name }}</div>
+            <div style="font-size:12px;color:#64748B;">{{ company.get_industry_type_display }}</div>
+          </div>
+          <div class="ms-auto">
+            {% if company.is_active %}
+            <span class="badge badge-success">Active</span>
+            {% else %}
+            <span class="badge badge-secondary">Inactive</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div style="font-size:13px;color:#64748B;margin-bottom:12px;">
+          <div class="d-flex align-items-center gap-2 mb-1"><i class="fas fa-map-marker-alt" style="width:14px;"></i>{{ company.address|truncatechars:50 }}</div>
+          <div class="d-flex align-items-center gap-2 mb-1"><i class="fas fa-user" style="width:14px;"></i>{{ company.contact_person }}</div>
+          <div class="d-flex align-items-center gap-2"><i class="fas fa-phone" style="width:14px;"></i>{{ company.contact_number }}</div>
+        </div>
+
+        <div class="d-flex gap-2 mb-3">
+          <div style="flex:1;text-align:center;padding:10px;background:#F8FAFF;border-radius:8px;">
+            <div style="font-size:20px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ company.get_student_count }}</div>
+            <div style="font-size:11px;color:#64748B;">Students</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:#F8FAFF;border-radius:8px;">
+            <div style="font-size:20px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ company.required_hours }}</div>
+            <div style="font-size:11px;color:#64748B;">Req. Hours</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:#F8FAFF;border-radius:8px;">
+            <div style="font-size:20px;font-weight:700;color:#2563EB;font-family:'Poppins',sans-serif;">{{ company.group_count }}</div>
+            <div style="font-size:11px;color:#64748B;">Groups</div>
+          </div>
+        </div>
+
+        <div style="padding:8px 12px;background:#F1F5F9;border-radius:8px;margin-bottom:14px;">
+          <div style="font-size:11px;color:#94A3B8;margin-bottom:2px;">Join Code</div>
+          <div class="d-flex align-items-center" style="gap:10px;">
+            <div style="font-size:16px;font-weight:700;letter-spacing:3px;color:#1E3A8A;font-family:'Poppins',sans-serif;">{{ company.join_code }}</div>
+            <button type="button" class="btn btn-sm btn-outline-secondary copy-join-code-btn" data-join-code="{{ company.join_code }}" title="Copy join code">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        </div>
+        {% if company.accepted_strands %}
+        <div class="mb-3">
+          <div style="font-size:11px;color:#94A3B8;margin-bottom:6px;">Accepted Strands</div>
+          {% for label in company.get_accepted_strands_display %}
+          <span class="badge badge-outline-secondary me-1">{{ label }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="d-flex gap-2 mt-auto">
+          <a href="{% url 'dean:company_detail' company.id %}" class="btn btn-sm btn-outline-primary flex-grow-1">
+            <i class="fas fa-eye me-1"></i>View
+          </a>
+          <a href="{% url 'dean:company_edit' company.id %}" class="btn btn-sm btn-outline-secondary flex-grow-1">
+            <i class="fas fa-edit me-1"></i>Edit
+          </a>
+          <form method="post" action="{% url 'dean:company_delete' company.id %}" style="display:inline;" onsubmit="return confirm('Delete this company? This will remove related groups and assignments.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger flex-grow-1" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="card">
+      <div class="empty-state" style="padding:80px;">
+        <i class="fas fa-building"></i>
+        <h5>No companies yet</h5>
+        <a href="{% url 'dean:company_create' %}" class="btn btn-primary mt-3">
+          <i class="fas fa-plus me-1"></i>Add First Company
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

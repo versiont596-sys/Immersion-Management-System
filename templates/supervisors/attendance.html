@@ -1,0 +1,172 @@
+{% extends 'supervisors/base_supervisor.html' %}
+
+{% block title %}Attendance Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>Attendance Management
+                        </h4>
+                        <small class="text-muted">{{ active_sessions }} active session{% if active_sessions != 1 %}s{% endif %} today</small>
+                    </div>
+                    <div>
+                        <a href="{% url 'supervisors:excuse_requests' %}" class="btn btn-primary btn-sm me-2">
+                            <i class="fas fa-envelope-open-text me-2"></i>Excuse Requests
+                        </a>
+                        <a href="{% url 'supervisors:requirements' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-file-alt me-2"></i>Review Requirements
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filter Form -->
+                    <form method="get" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="group" class="form-label">Group</label>
+                                <select name="group" id="group" class="form-select">
+                                    <option value="">All Groups</option>
+                                    {% for group in groups %}
+                                    <option value="{{ group.id }}" {% if selected_group == group.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ group.company.name }} - {{ group.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" name="date" id="date" class="form-control"
+                                       value="{{ selected_date }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="status" class="form-label">Status</label>
+                                <select name="status" id="status" class="form-select">
+                                    <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All Statuses</option>
+                                    <option value="present" {% if selected_status == 'present' %}selected{% endif %}>Present</option>
+                                    <option value="absent" {% if selected_status == 'absent' %}selected{% endif %}>Absent</option>
+                                    <option value="late" {% if selected_status == 'late' %}selected{% endif %}>Late</option>
+                                    <option value="excused" {% if selected_status == 'excused' %}selected{% endif %}>Excused</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-filter me-2"></i>Filter
+                                </button>
+                                <a href="{% url 'supervisors:attendance' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Clear
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Attendance Records Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Group</th>
+                                    <th>Date</th>
+                                    <th>Time/Hours In</th>
+                                    <th>Break Out</th>
+                                    <th>Break In</th>
+                                    <th>Time/Hours Out</th>
+                                    <th>Session</th>
+                                    <th>Approval</th>
+                                    <th>Hours</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in records %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                {{ record.student.user.first_name|first }}{{ record.student.user.last_name|first }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ record.student.user.get_full_name }}</div>
+                                                <small class="text-muted">{{ record.student.student_id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ record.group.company.name }}<br><small>{{ record.group.name }}</small></td>
+                                    <td>{{ record.date|date:"d M Y" }}</td>
+                                    <td>{{ record.time_in|time:"g:i A"|default:"—" }}</td>
+                                    <td>{{ record.break_out|time:"g:i A"|default:"—" }}</td>
+                                    <td>{{ record.break_in|time:"g:i A"|default:"—" }}</td>
+                                    <td>{{ record.time_out|time:"g:i A"|default:"—" }}</td>
+                                    <td>
+                                        {% if record.time_out %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif record.break_out and not record.break_in %}
+                                            <span class="badge bg-warning text-dark">On Break</span>
+                                        {% elif record.time_in and not record.time_out %}
+                                            <span class="badge bg-primary">In Session</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if record.approval_status == 'approved' %}success{% elif record.approval_status == 'rejected' %}danger{% elif record.approval_status == 'pending' %}warning text-dark{% else %}secondary{% endif %}">
+                                            {{ record.get_approval_status_display|default:record.approval_status|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if record.hours_rendered %}
+                                        {{ record.hours_rendered }}h
+                                        {% else %}
+                                        —
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if record.status == 'present' %}success{% elif record.status == 'late' %}warning{% elif record.status == 'absent' %}danger{% elif record.status == 'excused' %}info{% else %}secondary{% endif %}">
+                                            {{ record.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if record.approval_status == 'pending' %}
+                                            <form method="post" action="{% url 'supervisors:approve_attendance' record.id %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-success me-1">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                            <form method="post" action="{% url 'supervisors:reject_attendance' record.id %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                        <form method="post" action="{% url 'supervisors:attendance_delete' record.id %}" style="display:inline; margin-left:4px;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this attendance record?');">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="12" class="text-center text-muted">
+                                        No attendance records found for the selected filters.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

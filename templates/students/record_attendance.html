@@ -1,0 +1,270 @@
+﻿{% extends 'students/base_student.html' %}
+
+{% block title %}Record Attendance{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-clock me-2"></i>Record Attendance
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Immersion time tracking is now manual.</strong>
+                                <p class="mb-0 mt-2">Use the buttons below to track your time in, break out, break in, and time out. This system records the exact server time and does not allow students to manually set timestamps.</p>
+                                <p class="mb-0 mt-2"><strong>Server time (Philippines):</strong> {{ server_time|date:"d M Y" }} {{ server_time|time:"g:i A" }}</p>
+                            </div>
+
+                            <form method="post">
+                                {% csrf_token %}
+
+                                <div class="mb-4">
+                                    <label for="group" class="form-label">
+                                        <i class="fas fa-building me-2"></i>Select Immersion Group
+                                    </label>
+                                    <select id="group" name="group" class="form-select">
+                                        {% for assignment in assignments %}
+                                        <option value="{{ assignment.group.id }}">
+                                            {{ assignment.group.company.name }} — {{ assignment.group.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="alert alert-secondary mb-4">
+                                    <strong>Selected group status:</strong>
+                                    <span id="selected-group-status">Loading...</span>
+                                    <div id="session-guidance" class="mt-2 text-muted">The next available action appears automatically when you select a group.</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <h5 class="mb-3">Today's Record</h5>
+                                    {% if today_records %}
+                                        {% for record in today_records %}
+                                            <div class="mb-3 p-3 border rounded bg-white">
+                                                <strong>{{ record.group.company.name }} - {{ record.group.name }}</strong>
+                                                <div class="row mt-2">
+                                                    <div class="col-sm-6 mb-2">
+                                                        <strong>Time In:</strong> {{ record.time_in|time:"g:i A"|default:'—' }}
+                                                    </div>
+                                                    <div class="col-sm-6 mb-2">
+                                                        <strong>Break Out:</strong> {{ record.break_out|time:"g:i A"|default:'—' }}
+                                                    </div>
+                                                    <div class="col-sm-6 mb-2">
+                                                        <strong>Break In:</strong> {{ record.break_in|time:"g:i A"|default:'—' }}
+                                                    </div>
+                                                    <div class="col-sm-6 mb-2">
+                                                        <strong>Time Out:</strong> {{ record.time_out|time:"g:i A"|default:'—' }}
+                                                    </div>
+                                                    <div class="col-sm-12 mb-2">
+                                                        <strong>Status:</strong>
+                                                        {% if record.current_phase == 'completed' %}
+                                                            <span class="badge bg-success">Completed</span>
+                                                        {% elif record.current_phase == 'break' %}
+                                                            <span class="badge bg-warning text-dark">On Break</span>
+                                                        {% elif record.current_phase == 'resumed' or record.current_phase == 'working' %}
+                                                            <span class="badge bg-primary">In Session</span>
+                                                        {% else %}
+                                                            <span class="badge bg-secondary">Pending</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="col-sm-12 mb-2">
+                                                        <strong>Hours Rendered:</strong> {{ record.hours_rendered }}h
+                                                    </div>
+                                                    <div class="col-sm-12 mb-2">
+                                                        <strong>Approval Status:</strong>
+                                                        {% if record.approval_status == 'approved' %}
+                                                            <span class="badge bg-success">Approved</span>
+                                                        {% elif record.approval_status == 'rejected' %}
+                                                            <span class="badge bg-danger">Rejected</span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning text-dark">Pending</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% if not record.time_out and record.time_in %}
+                                                    <div class="col-sm-12">
+                                                        <div id="session-timer-{{ forloop.counter0 }}" class="session-timer fw-bold text-primary" data-start-ms="{% if record.current_timer_start %}{% if record.break_out and not record.break_in %}{{ record.timer_start_ms }}{% elif record.break_in %}{{ record.timer_start_ms }}{% else %}{{ record.timer_start_ms }}{% endif %}{% endif %}" data-phase="{% if record.break_out and not record.break_in %}break{% elif record.break_in %}resumed{% else %}work{% endif %}" data-server-ms="{{ server_time_ms }}">
+                                                            Loading timer...
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No attendance actions recorded for today yet.</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="row g-2">
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <button type="submit" id="btn-time-in" name="action" value="time_in" class="btn btn-primary w-100">
+                                                <i class="fas fa-sign-in-alt me-2"></i>Time In
+                                            </button>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <button type="submit" id="btn-break-out" name="action" value="break_out" class="btn btn-warning w-100">
+                                                <i class="fas fa-coffee me-2"></i>Break Out
+                                            </button>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <button type="submit" id="btn-break-in" name="action" value="break_in" class="btn btn-info w-100 text-white">
+                                                <i class="fas fa-play me-2"></i>Break In
+                                            </button>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <button type="submit" id="btn-time-out" name="action" value="time_out" class="btn btn-success w-100">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Time Out
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'students:attendance' %}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>View Attendance
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-clock me-2"></i>What is tracked?
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <span class="badge bg-primary me-2">Time In</span>
+                                        Start of your immersion day
+                                    </div>
+                                    <div class="mb-3">
+                                        <span class="badge bg-warning me-2">Break Out</span>
+                                        Beginning of break time
+                                    </div>
+                                    <div class="mb-3">
+                                        <span class="badge bg-info me-2">Break In</span>
+                                        End of break time
+                                    </div>
+                                    <div class="mb-3">
+                                        <span class="badge bg-success me-2">Time Out</span>
+                                        End of your immersion day
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-lightbulb me-2"></i>Why this works
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-0">This records your actual immersion session times and lets the system calculate hours rendered automatically. It is simpler and removes camera/QR dependencies.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="application/json" id="group-states-data">{{ group_states_json|safe }}</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const groupStates = JSON.parse(document.getElementById('group-states-data').textContent || '{}');
+    const groupSelect = document.getElementById('group');
+    const statusLabel = document.getElementById('selected-group-status');
+    const guidance = document.getElementById('session-guidance');
+    const actionButtons = {
+        time_in: document.getElementById('btn-time-in'),
+        break_out: document.getElementById('btn-break-out'),
+        break_in: document.getElementById('btn-break-in'),
+        time_out: document.getElementById('btn-time-out'),
+    };
+
+    function getState() {
+        return groupStates[groupSelect.value] || groupStates[Object.keys(groupStates)[0]] || {
+            phase: 'not_started',
+            can_time_in: true,
+            can_break_out: false,
+            can_break_in: false,
+            can_time_out: false,
+        };
+    }
+
+    function refreshActionButtons() {
+        const state = getState();
+        actionButtons.time_in.disabled = !state.can_time_in;
+        actionButtons.break_out.disabled = !state.can_break_out;
+        actionButtons.break_in.disabled = !state.can_break_in;
+        actionButtons.time_out.disabled = !state.can_time_out;
+
+        let statusText = 'Pending attendance';
+        if (state.phase === 'completed') statusText = 'Session completed';
+        else if (state.phase === 'break') statusText = 'Currently on break';
+        else if (state.phase === 'resumed') statusText = 'Resumed immersion';
+        else if (state.phase === 'working') statusText = 'Currently working';
+
+        statusLabel.textContent = statusText;
+
+        if (state.phase === 'not_started') {
+            guidance.textContent = 'Press Time In to start your immersion day.';
+        } else if (state.phase === 'working') {
+            guidance.textContent = 'You can take a break or time out when you finish for today.';
+        } else if (state.phase === 'break') {
+            guidance.textContent = 'Press Break In when you return from break.';
+        } else if (state.phase === 'resumed') {
+            guidance.textContent = 'Continue working or time out when done.';
+        } else if (state.phase === 'completed') {
+            guidance.textContent = 'Your session is complete for today.';
+        }
+    }
+
+    groupSelect.addEventListener('change', refreshActionButtons);
+    refreshActionButtons();
+
+    const timerElements = document.querySelectorAll('.session-timer');
+    timerElements.forEach(el => {
+        const startValue = el.dataset.startMs;
+        const phase = el.dataset.phase;
+        const serverTimeValue = el.dataset.serverMs;
+        if (!startValue || !serverTimeValue) return;
+
+        const startTime = new Date(parseInt(startValue, 10));
+        const serverTimeMs = parseInt(serverTimeValue, 10);
+        const offset = Date.now() - serverTimeMs;
+
+        const label = phase === 'break' ? 'Break elapsed' : phase === 'resumed' ? 'Immersion resumed' : 'Immersion elapsed';
+
+        function formatDuration(milliseconds) {
+            const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+            const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function refreshTimer() {
+            const now = new Date(Date.now() - offset);
+            const elapsedMs = now - startTime;
+            el.textContent = `${label}: ${formatDuration(elapsedMs)}`;
+        }
+
+        refreshTimer();
+        setInterval(refreshTimer, 1000);
+    });
+});
+</script>
+{% endblock %}

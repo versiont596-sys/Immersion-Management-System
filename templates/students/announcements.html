@@ -1,0 +1,37 @@
+{% extends 'students/base_student.html' %}
+{% block title %}Announcements{% endblock %}
+{% block page_title %}Announcements{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><h5>Announcements</h5></div>
+  <div class="card-body p-0">
+    {% if announcements %}
+      {% for ann in announcements %}
+      <div style="padding:18px 20px; border-bottom:1px solid #E2E8F0;">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div>
+            {% if ann.is_pinned %}
+            <span class="badge badge-warning"><i class="fas fa-thumbtack me-1"></i>Pinned</span>
+            {% endif %}
+            <span class="badge badge-secondary">{{ ann.get_target_role_display }}</span>
+            {% if ann.group %}<span class="badge badge-info">{{ ann.group.name }}</span>{% endif %}
+          </div>
+          <div style="font-size:12px;color:#94A3B8;">{{ ann.created_at|timesince }} ago</div>
+        </div>
+        <div style="font-size:16px;font-weight:700;color:#1E293B;">{{ ann.title }}</div>
+        <div style="font-size:14px;color:#64748B;margin-top:8px;">{{ ann.content }}</div>
+        <div style="font-size:12px;color:#94A3B8;margin-top:10px;">
+          <i class="fas fa-user me-1"></i>{{ ann.posted_by.get_full_name }}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding:60px;">
+        <i class="fas fa-bullhorn"></i>
+        <h5>No announcements yet</h5>
+        <p style="color:#94A3B8;">Announcements will appear here once posted by the dean.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

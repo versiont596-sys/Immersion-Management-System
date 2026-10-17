@@ -1,0 +1,63 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}System Settings{% endblock %}
+{% block page_subtitle %}Configure system preferences{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-info-circle" style="color:#2563EB;"></i><h5>System Information</h5></div>
+      <div class="card-body">
+        <table class="table table-borderless" style="font-size:14px;">
+          <tr><td style="color:#64748B;width:160px;">System Name</td><td><strong>ImmersionTrack</strong></td></tr>
+          <tr><td style="color:#64748B;">Version</td><td><strong>1.0.0</strong></td></tr>
+          <tr><td style="color:#64748B;">Framework</td><td><strong>Django 4.2+</strong></td></tr>
+          <tr><td style="color:#64748B;">Admin User</td><td><strong>{{ request.user.get_full_name }}</strong></td></tr>
+          <tr><td style="color:#64748B;">Role</td><td><span class="badge badge-purple">Dean / Administrator</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header"><i class="fas fa-bell" style="color:#F59E0B;"></i><h5>Pending Actions</h5></div>
+      <div class="card-body">
+        {% if pending_students > 0 %}
+        <div class="d-flex align-items-center justify-content-between p-3" style="background:#FFFBEB;border-radius:10px;margin-bottom:10px;">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#92400E;">Pending Student Approvals</div>
+            <div style="font-size:12px;color:#B45309;">{{ pending_students }} students waiting for approval</div>
+          </div>
+          <a href="{% url 'dean:students' %}?status=pending" class="btn btn-sm btn-warning">Review</a>
+        </div>
+        {% else %}
+        <div style="font-size:14px;color:#10B981;text-align:center;padding:20px;">
+          <i class="fas fa-check-circle me-2"></i>No pending actions!
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-link" style="color:#7C3AED;"></i><h5>Quick Links</h5></div>
+      <div class="card-body p-0">
+        {% for name, url, icon, color in quick_links %}
+        <a href="{{ url }}" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;color:#1E293B;border-bottom:1px solid #E2E8F0;transition:background 0.15s;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''">
+          <i class="{{ icon }}" style="color:{{ color }};width:18px;"></i>
+          <span style="font-size:14px;">{{ name }}</span>
+          <i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;font-size:12px;"></i>
+        </a>
+        {% empty %}
+        <a href="{% url 'dean:students' %}" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;color:#1E293B;border-bottom:1px solid #E2E8F0;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''"><i class="fas fa-users" style="color:#2563EB;width:18px;"></i><span style="font-size:14px;">Manage Students</span><i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;font-size:12px;"></i></a>
+        <a href="{% url 'dean:companies' %}" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;color:#1E293B;border-bottom:1px solid #E2E8F0;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''"><i class="fas fa-building" style="color:#10B981;width:18px;"></i><span style="font-size:14px;">Manage Companies</span><i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;font-size:12px;"></i></a>
+        <a href="{% url 'dean:supervisors' %}" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;color:#1E293B;border-bottom:1px solid #E2E8F0;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''"><i class="fas fa-user-tie" style="color:#7C3AED;width:18px;"></i><span style="font-size:14px;">Manage Supervisors</span><i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;font-size:12px;"></i></a>
+        <a href="{% url 'dean:reports' %}" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;color:#1E293B;border-bottom:1px solid #E2E8F0;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''"><i class="fas fa-chart-bar" style="color:#F59E0B;width:18px;"></i><span style="font-size:14px;">View Reports</span><i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;font-size:12px;"></i></a>
+        <a href="/admin/" class="d-flex align-items-center gap-3 p-3" style="text-decoration:none;color:#1E293B;" onmouseover="this.style.background='#F8FAFF'" onmouseout="this.style.background=''"><i class="fas fa-tools" style="color:#EF4444;width:18px;"></i><span style="font-size:14px;">Django Admin Panel</span><i class="fas fa-chevron-right ms-auto" style="color:#CBD5E1;font-size:12px;"></i></a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

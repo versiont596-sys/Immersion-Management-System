@@ -1,0 +1,95 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}{% if company %}Edit{% else %}Add{% endif %} Company{% endblock %}
+{% block page_title %}{% if company %}Edit Company{% else %}Add Company{% endif %}{% endblock %}
+{% block page_subtitle %}{% if company %}Update company information{% else %}Register a new immersion company{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-building" style="color:#10B981;"></i>
+        <h5>Company Details</h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Company Name *</label>
+              <input type="text" name="name" class="form-control" value="{{ company.name|default:'' }}" required placeholder="e.g. ABC Corporation"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Industry Type</label>
+              <select name="industry_type" class="form-select">
+                {% for value, label in industry_choices %}
+                <option value="{{ value }}" {% if company and company.industry_type == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Required Hours</label>
+              <input type="number" name="required_hours" class="form-control" value="{{ company.required_hours|default:80 }}" min="1"/>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Capacity</label>
+              <input type="number" name="capacity" class="form-control" value="{{ company.capacity|default:50 }}" min="1"/>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Address *</label>
+              <textarea name="address" class="form-control" rows="2" required>{{ company.address|default:'' }}</textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Contact Person *</label>
+              <input type="text" name="contact_person" class="form-control" value="{{ company.contact_person|default:'' }}" required/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Contact Number</label>
+              <input type="text" name="contact_number" class="form-control" value="{{ company.contact_number|default:'' }}"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" value="{{ company.email|default:'' }}"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Accepted Strands</label>
+              <select name="accepted_strands" class="form-select" multiple size="5">
+                {% for value, label in strand_choices %}
+                <option value="{{ value }}" {% if company and value in company.accepted_strands %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text">Hold Ctrl/Cmd to select multiple strands. Leave empty to allow all.</div>
+            </div>
+            {% if company %}
+            <div class="col-md-6">
+              <label class="form-label">Join Code</label>
+              <input type="text" class="form-control" value="{{ company.join_code }}" readonly />
+              <div class="form-text">This code is generated automatically and can be shared with students.</div>
+            </div>
+            {% endif %}
+            {% if company %}
+            <div class="col-md-6">
+              <label class="form-label">Active Status</label>
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="is_active" id="is_active" {% if company.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Company is Active</label>
+              </div>
+            </div>
+            {% endif %}
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea name="description" class="form-control" rows="3" placeholder="Brief company description…">{{ company.description|default:'' }}</textarea>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i>{% if company %}Update Company{% else %}Create Company{% endif %}
+            </button>
+            <a href="{% url 'dean:companies' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

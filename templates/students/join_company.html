@@ -1,0 +1,110 @@
+{% extends 'students/base_student.html' %}
+{% block title %}My Company{% endblock %}
+{% block page_title %}My Immersion Company{% endblock %}
+{% block page_subtitle %}Join or view your assigned company{% endblock %}
+
+{% block content %}
+{% if existing %}
+<!-- ALREADY JOINED -->
+<div class="card mb-4" style="border-top:4px solid #10B981;">
+  <div class="card-body">
+    <div class="d-flex align-items-center gap-4 mb-4">
+      <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#ECFDF5,#A7F3D0);display:flex;align-items:center;justify-content:center;font-size:32px;">🏢</div>
+      <div>
+        <div style="font-size:24px;font-weight:800;color:#1E293B;font-family:'Poppins',sans-serif;">{{ existing.group.company.name }}</div>
+        <div style="font-size:14px;color:#10B981;font-weight:600;">Active Immersion</div>
+        <div style="font-size:13px;color:#64748B;margin-top:2px;">Group: {{ existing.group.name }}</div>
+      </div>
+      <span class="badge badge-success ms-auto" style="font-size:13px;padding:8px 16px;">
+        <i class="fas fa-check-circle me-1"></i>Enrolled
+      </span>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div style="background:#F8FAFF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Company Details</div>
+          <div class="d-flex flex-column gap-2">
+            <div><i class="fas fa-map-marker-alt me-2 text-muted" style="width:16px;"></i><span style="font-size:13px;">{{ existing.group.company.address }}</span></div>
+            <div><i class="fas fa-user me-2 text-muted" style="width:16px;"></i><span style="font-size:13px;">{{ existing.group.company.contact_person }}</span></div>
+            <div><i class="fas fa-phone me-2 text-muted" style="width:16px;"></i><span style="font-size:13px;">{{ existing.group.company.contact_number }}</span></div>
+            <div><i class="fas fa-envelope me-2 text-muted" style="width:16px;"></i><span style="font-size:13px;">{{ existing.group.company.email }}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="background:#F8FAFF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Immersion Schedule</div>
+          <div class="d-flex flex-column gap-2">
+            <div><i class="fas fa-calendar-alt me-2 text-muted" style="width:16px;"></i><span style="font-size:13px;">{{ existing.group.start_date|date:"F d, Y" }}</span></div>
+            <div><i class="fas fa-calendar-check me-2 text-muted" style="width:16px;"></i><span style="font-size:13px;">{{ existing.group.end_date|date:"F d, Y" }}</span></div>
+            <div><i class="fas fa-clock me-2 text-muted" style="width:16px;"></i><span style="font-size:13px;">{{ existing.group.company.required_hours }} required hours</span></div>
+            <div><i class="fas fa-users me-2 text-muted" style="width:16px;"></i><span style="font-size:13px;">{{ existing.group.get_student_count }} students in group</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:14px 18px;background:#EFF6FF;border-radius:10px;display:flex;align-items:center;gap:10px;">
+      <div>
+        <div style="font-size:11px;color:#1D4ED8;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Join Code</div>
+        <div style="font-size:22px;font-weight:800;color:#1E3A8A;letter-spacing:4px;font-family:'Poppins',sans-serif;">{{ existing.group.company.join_code }}</div>
+      </div>
+      <div style="font-size:12px;color:#2563EB;margin-left:auto;">Share with classmates<br>to join the same group</div>
+    </div>
+
+    <div style="font-size:12px;color:#94A3B8;margin-top:12px;">
+      <i class="fas fa-clock me-1"></i>Joined {{ existing.joined_at|date:"F d, Y" }}
+    </div>
+
+    <form method="post" action="{% url 'students:leave_company' %}" onsubmit="return confirm('Are you sure you want to leave this company?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger w-100 mt-4">
+        <i class="fas fa-door-open me-2"></i>Leave Company
+      </button>
+    </form>
+  </div>
+</div>
+
+{% else %}
+<!-- JOIN FORM -->
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-door-open" style="color:#10B981;"></i>
+        <h5>Join an Immersion Company</h5>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info mb-4" style="font-size:13px;">
+          <i class="fas fa-info-circle me-1"></i>
+          Enter the <strong>Join Code</strong> provided by your supervisor or school administrator to join an immersion group.
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-4">
+            <label class="form-label">Join Code *</label>
+            <input type="text" name="join_code" class="form-control"
+                   style="font-size:24px;letter-spacing:6px;font-weight:700;text-align:center;text-transform:uppercase;padding:16px;"
+                   placeholder="XXXXXXXX" maxlength="20" required autofocus/>
+            <div style="font-size:12px;color:#94A3B8;text-align:center;margin-top:6px;">
+              Enter the 8-character code from your supervisor
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100" style="padding:13px;">
+            <i class="fas fa-sign-in-alt me-2"></i>Join Company
+          </button>
+        </form>
+
+        <hr style="margin:24px 0;border-color:#E2E8F0;">
+        <div style="text-align:center;font-size:13px;color:#94A3B8;">
+          <i class="fas fa-question-circle me-1"></i>
+          Don't have a code? Contact your <strong>supervisor</strong> or the <strong>Administrator</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

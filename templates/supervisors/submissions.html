@@ -1,0 +1,65 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Submissions{% endblock %}
+{% block page_title %}Task Submissions{% endblock %}
+{% block page_subtitle %}Review and grade student submissions{% endblock %}
+
+{% block content %}
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  <a href="?status=all" class="btn btn-sm {% if filter_status == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+  <a href="?status=submitted" class="btn btn-sm {% if filter_status == 'submitted' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Pending Review</a>
+  <a href="?status=graded" class="btn btn-sm {% if filter_status == 'graded' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Graded</a>
+  <a href="?status=late" class="btn btn-sm {% if filter_status == 'late' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Late</a>
+  <a href="?status=returned" class="btn btn-sm {% if filter_status == 'returned' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Returned</a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr><th>Student</th><th>Task</th><th>Submitted</th><th>File</th><th>Score</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for sub in submissions %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar avatar-sm">{{ sub.student.user.first_name|first }}{{ sub.student.user.last_name|first }}</div>
+              <div>
+                <div style="font-size:13px;font-weight:600;">{{ sub.student.user.get_full_name }}</div>
+                <div style="font-size:11px;color:#64748B;">{{ sub.student.strand }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:13px;font-weight:500;">{{ sub.task.title|truncatechars:30 }}</td>
+          <td style="font-size:12px;color:#64748B;white-space:nowrap;">{{ sub.submitted_at|date:"M d, g:i A" }}</td>
+          <td>
+            <a href="{{ sub.file.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-download me-1"></i>File
+            </a>
+          </td>
+          <td>
+            {% if sub.score is not None %}
+            <span style="font-weight:700;color:#10B981;">{{ sub.score }}/{{ sub.task.max_score }}</span>
+            {% else %}
+            <span style="color:#CBD5E1;">—</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge badge-{% if sub.status == 'graded' %}success{% elif sub.status == 'submitted' %}info{% elif sub.status == 'late' %}warning{% elif sub.status == 'returned' %}danger{% else %}secondary{% endif %}">
+              {{ sub.get_status_display }}
+            </span>
+          </td>
+          <td>
+            <a href="{% url 'supervisors:grade_submission' sub.id %}" class="btn btn-sm btn-primary">
+              {% if sub.status == 'graded' %}View{% else %}Grade{% endif %}
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state"><i class="fas fa-inbox"></i><h5>No submissions found</h5></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

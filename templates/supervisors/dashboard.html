@@ -1,0 +1,122 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Supervisor Dashboard{% endblock %}
+{% block page_title %}Supervisor Dashboard{% endblock %}
+{% block page_subtitle %}{{ supervisor.company.name }}{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+      <div><div class="stat-value">{{ total_students }}</div><div class="stat-label">Assigned Students</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="fas fa-file-alt"></i></div>
+      <div><div class="stat-value">{{ pending_submissions }}</div><div class="stat-label">Pending Reviews</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="fas fa-book"></i></div>
+      <div><div class="stat-value">{{ pending_journals }}</div><div class="stat-label">Journals to Review</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-calendar-check"></i></div>
+      <div><div class="stat-value">{{ today_attendance }}</div><div class="stat-label">Today's Attendance</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon red"><i class="fas fa-running"></i></div>
+      <div><div class="stat-value">{{ active_sessions }}</div><div class="stat-label">Active Sessions</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- RECENT SUBMISSIONS -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-inbox" style="color:#2563EB;"></i>
+        <h5>Recent Submissions</h5>
+        <a href="{% url 'supervisors:submissions' %}" class="btn btn-sm btn-primary ms-auto">View All</a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_submissions %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Task</th>
+                <th>Submitted</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sub in recent_submissions %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="avatar avatar-sm">{{ sub.student.user.first_name|first }}{{ sub.student.user.last_name|first }}</div>
+                    {{ sub.student.user.get_full_name }}
+                  </div>
+                </td>
+                <td>{{ sub.task.title|truncatechars:30 }}</td>
+                <td style="font-size:12px;color:#64748B;">{{ sub.submitted_at|date:"M d, g:i A" }}</td>
+                <td>
+                  <span class="badge badge-{% if sub.status == 'graded' %}success{% elif sub.status == 'submitted' %}info{% elif sub.status == 'late' %}warning{% else %}secondary{% endif %}">
+                    {{ sub.get_status_display }}
+                  </span>
+                </td>
+                <td>
+                  <a href="{% url 'supervisors:grade_submission' sub.id %}" class="btn btn-sm btn-primary">
+                    {% if sub.status == 'graded' %}View{% else %}Grade{% endif %}
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state"><i class="fas fa-inbox"></i><h5>No submissions yet</h5></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUPS -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-layer-group" style="color:#10B981;"></i><h5>My Groups</h5></div>
+      <div class="card-body p-0">
+        {% for group in groups %}
+        <div style="padding:16px 20px;border-bottom:1px solid #E2E8F0;">
+          <div style="font-size:14px;font-weight:600;color:#1E293B;">{{ group.name }}</div>
+          <div style="font-size:12px;color:#64748B;margin-top:3px;">
+            <i class="fas fa-building me-1"></i>{{ group.company.name }}
+          </div>
+          <div style="font-size:12px;color:#64748B;margin-top:2px;">
+            <i class="fas fa-users me-1"></i>{{ group.get_student_count }} students
+          </div>
+          <div class="mt-2">
+            <span class="badge {% if group.is_open %}badge-success{% else %}badge-secondary{% endif %}">
+              {% if group.is_open %}Open{% else %}Closed{% endif %}
+            </span>
+          </div>
+        </div>
+        {% empty %}
+        <div class="empty-state"><i class="fas fa-layer-group"></i><h5>No groups assigned</h5></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'dean/base_dean.html' %}
+{% block title %}Edit Supervisor{% endblock %}
+{% block page_title %}Edit Supervisor{% endblock %}
+{% block page_subtitle %}Update supervisor account details and company assignment{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-end mb-3">
+  <form method="post" action="{% url 'dean:supervisor_delete' supervisor.id %}" onsubmit="return confirm('Delete this supervisor account?');">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-danger">
+      <i class="fas fa-trash me-1"></i>Delete Supervisor
+    </button>
+  </form>
+</div>
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card mb-3">
+      <div class="card-header"><h5>Supervisor Account</h5></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-control" value="{{ supervisor.user.username }}" disabled />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Status</label>
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="is_active" id="is_active" {% if supervisor.user.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Active account</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">First Name *</label>
+              <input type="text" name="first_name" class="form-control" value="{{ supervisor.user.first_name }}" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Last Name *</label>
+              <input type="text" name="last_name" class="form-control" value="{{ supervisor.user.last_name }}" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" value="{{ supervisor.user.email }}" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Company</label>
+              <select name="company" class="form-select">
+                <option value="">— No Company —</option>
+                {% for c in companies %}
+                <option value="{{ c.id }}" {% if supervisor.company and supervisor.company.id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Position</label>
+              <input type="text" name="position" class="form-control" value="{{ supervisor.position }}" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Strand</label>
+              <select name="strand" class="form-select">
+                <option value="">— Select Strand —</option>
+                {% for code,label in strand_choices %}
+                <option value="{{ code }}" {% if supervisor.strand == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Contact Number</label>
+              <input type="text" name="contact_number" class="form-control" value="{{ supervisor.contact_number }}" />
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i>Save Changes
+            </button>
+            <a href="{% url 'dean:supervisors' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

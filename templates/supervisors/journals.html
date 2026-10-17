@@ -1,0 +1,49 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Journals{% endblock %}
+{% block page_title %}Journals{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <h5>Journals</h5>
+    <form method="get" class="d-flex align-items-center gap-2">
+      <select name="status" class="form-select form-select-sm">
+        <option value="all" {% if filter_status == 'all' %}selected{% endif %}>All Statuses</option>
+        <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>Pending Review</option>
+        <option value="approved" {% if filter_status == 'approved' %}selected{% endif %}>Approved</option>
+        <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>Rejected</option>
+      </select>
+      <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Summary</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for journal in journals %}
+        <tr>
+          <td>{{ journal.student.user.get_full_name }}</td>
+          <td>{{ journal.date|date:'M d, Y' }}</td>
+          <td>
+            <span class="badge {% if journal.status == 'approved' %}badge-success{% elif journal.status == 'rejected' %}badge-danger{% else %}badge-warning{% endif %}">{{ journal.get_status_display }}</span>
+          </td>
+          <td style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ journal.activities|truncatechars:80 }}</td>
+          <td>
+            <a href="{% url 'supervisors:review_journal' journal.id %}" class="btn btn-sm btn-outline-primary">Review</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><i class="fas fa-book-open"></i><h5>No journal entries found</h5><p style="color:#94A3B8;">When students submit journals, they will appear here for review.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

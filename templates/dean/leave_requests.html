@@ -1,0 +1,65 @@
+{% extends 'dean/base_dean.html' %}
+
+{% block title %}Leave Requests{% endblock %}
+{% block page_title %}Leave Requests{% endblock %}
+{% block page_subtitle %}Review and act on student leave requests submitted to the dean.{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Student ID</th>
+                <th>Group</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Reason</th>
+                <th>Submitted</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for leave_request in requests %}
+                <tr>
+                  <td>{{ leave_request.student.user.get_full_name }}</td>
+                  <td>{{ leave_request.student.student_id }}</td>
+                  <td>{{ leave_request.group.name }}</td>
+                  <td>{{ leave_request.group.company.name }}</td>
+                  <td>{{ leave_request.get_status_display }}</td>
+                  <td>{{ leave_request.reason|default:'—' }}</td>
+                  <td>{{ leave_request.submitted_at|date:'M d, Y H:i' }}</td>
+                  <td>
+                    {% if leave_request.status == 'pending' %}
+                      <form method="post" action="{% url 'dean:approve_leave_request' leave_request.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="response_note" value="Approved by dean">
+                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                      </form>
+                      <form method="post" action="{% url 'dean:reject_leave_request' leave_request.id %}" class="d-inline ms-1">
+                        {% csrf_token %}
+                        <input type="hidden" name="response_note" value="Declined by dean">
+                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                      </form>
+                    {% else %}
+                      <span class="text-muted">No action needed</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center">No leave requests have been submitted yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

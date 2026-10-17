@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block sidebar_nav %}
+<span class="nav-section-title">Main</span>
+<a href="{% url 'students:dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+  <i class="fas fa-th-large nav-icon"></i> Dashboard
+</a>
+
+<span class="nav-section-title">Immersion</span>
+<a href="{% url 'students:tasks' %}" class="sidebar-link {% if 'task' in request.resolver_match.url_name %}active{% endif %}">
+  <i class="fas fa-tasks nav-icon"></i> Tasks
+</a>
+<a href="{% url 'students:attendance' %}" class="sidebar-link {% if request.resolver_match.url_name == 'attendance' %}active{% endif %}">
+  <i class="fas fa-calendar-check nav-icon"></i> Attendance
+</a>
+<a href="{% url 'students:record_attendance' %}" class="sidebar-link {% if request.resolver_match.url_name == 'record_attendance' %}active{% endif %}">
+  <i class="fas fa-clock nav-icon"></i> Record Attendance
+</a>
+<a href="{% url 'students:journals' %}" class="sidebar-link {% if request.resolver_match.url_name == 'journals' %}active{% endif %}">
+  <i class="fas fa-book nav-icon"></i> Daily Journal
+</a>
+<a href="{% url 'students:evaluation' %}" class="sidebar-link {% if request.resolver_match.url_name == 'evaluation' %}active{% endif %}">
+  <i class="fas fa-star nav-icon"></i> Evaluation
+</a>
+
+<span class="nav-section-title">Documents</span>
+<a href="{% url 'students:requirements' %}" class="sidebar-link {% if request.resolver_match.url_name == 'requirements' %}active{% endif %}">
+  <i class="fas fa-file-upload nav-icon"></i> Requirements
+</a>
+<a href="{% url 'students:join_company' %}" class="sidebar-link {% if request.resolver_match.url_name == 'join_company' %}active{% endif %}">
+  <i class="fas fa-building nav-icon"></i> My Company
+</a>
+
+<span class="nav-section-title">More</span>
+<a href="{% url 'students:announcements' %}" class="sidebar-link {% if request.resolver_match.url_name == 'announcements' %}active{% endif %}">
+  <i class="fas fa-bullhorn nav-icon"></i> Announcements
+</a>
+<a href="{% url 'students:notifications' %}" class="sidebar-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+  <i class="fas fa-bell nav-icon"></i> Notifications
+  {% if unread_notifications_count > 0 %}
+  <span class="badge-count">{{ unread_notifications_count }}</span>
+  {% endif %}
+</a>
+<a href="{% url 'students:profile' %}" class="sidebar-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+  <i class="fas fa-user-circle nav-icon"></i> My Profile
+</a>
+{% endblock %}
+
+{% block notif_url %}{% url 'students:notifications' %}{% endblock %}
+{% block profile_url %}{% url 'students:profile' %}{% endblock %}

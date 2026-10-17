@@ -1,0 +1,141 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Company Detail{% endblock %}
+{% block page_title %}Company Detail{% endblock %}
+{% block page_subtitle %}View company profile and related immersion groups{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="mb-1">{{ company.name }}</h4>
+    <div class="text-muted">{{ company.get_industry_type_display }} • {{ company.address }}</div>
+  </div>
+  <a href="{% url 'supervisors:companies' %}" class="btn btn-outline-secondary btn-sm">Back to Companies</a>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <div class="text-muted" style="font-size:13px;">Status</div>
+            {% if company.is_active %}
+            <span class="badge badge-success">Active</span>
+            {% else %}
+            <span class="badge badge-secondary">Inactive</span>
+            {% endif %}
+          </div>
+          <div>
+            <div class="text-muted" style="font-size:13px;">Students Assigned</div>
+            <strong>{{ student_count }}</strong>
+          </div>
+        </div>
+        <dl class="row mb-0">
+          <dt class="col-sm-5">Contact Person</dt>
+          <dd class="col-sm-7">{{ company.contact_person|default:'—' }}</dd>
+
+          <dt class="col-sm-5">Contact Number</dt>
+          <dd class="col-sm-7">{{ company.contact_number|default:'—' }}</dd>
+
+          <dt class="col-sm-5">Email</dt>
+          <dd class="col-sm-7">{{ company.email|default:'—' }}</dd>
+
+          <dt class="col-sm-5">Required Hours</dt>
+          <dd class="col-sm-7">{{ company.required_hours }}</dd>
+
+          <dt class="col-sm-5">Join Code</dt>
+          <dd class="col-sm-7 d-flex align-items-center" style="gap:10px;">
+            <strong>{{ company.join_code }}</strong>
+            <button type="button" class="btn btn-sm btn-outline-secondary copy-join-code-btn" data-join-code="{{ company.join_code }}" title="Copy join code">
+              <i class="fas fa-copy"></i>
+            </button>
+          </dd>
+
+          <dt class="col-sm-5">Accepted Strands</dt>
+          <dd class="col-sm-7">
+            {% if company.accepted_strands %}
+              {% for label in company.get_accepted_strands_display %}
+              <span class="badge badge-info me-1">{{ label }}</span>
+              {% endfor %}
+            {% else %}
+              <span class="text-muted">All strands accepted</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-sm-5">Capacity</dt>
+          <dd class="col-sm-7">{{ company.capacity }}</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h5>Description</h5></div>
+      <div class="card-body">
+        <p class="mb-0">{{ company.description|default:'No description provided.' }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><h5>Immersion Groups</h5></div>
+      <div class="card-body">
+        {% if groups %}
+        <div class="list-group list-group-flush">
+          {% for group in groups %}
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ group.name }}</strong>
+                <div class="text-muted" style="font-size:13px;">{{ group.school_year }}</div>
+              </div>
+              <span class="badge badge-secondary">{{ group.is_open|yesno:'Open,Closed' }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-muted">No immersion groups created for this company yet.</div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-header"><h5>Assigned Supervisors</h5></div>
+      <div class="card-body">
+        {% if supervisors %}
+        <ul class="list-group list-group-flush">
+          {% for supervisor in supervisors %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ supervisor.get_full_name }}</strong>
+              <div class="text-muted" style="font-size:13px;">Supervisor</div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-muted">No supervisors assigned yet.</div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-header"><h5>Students You Handle</h5></div>
+      <div class="card-body">
+        {% if handled_students %}
+        <div class="list-group list-group-flush">
+          {% for student in handled_students %}
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ student.user.get_full_name }}</strong>
+                <div class="text-muted" style="font-size:13px;">{{ student.student_id }} • {{ student.get_strand_display }}</div>
+              </div>
+              <span class="badge badge-info">{{ student.section }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-muted">No active students assigned under this company yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

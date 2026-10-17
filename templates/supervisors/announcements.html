@@ -1,0 +1,79 @@
+{% extends 'supervisors/base_supervisor.html' %}
+{% block title %}Announcements{% endblock %}
+{% block page_title %}Announcements{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card" style="position:sticky;top:80px;">
+      <div class="card-header">
+        <i class="fas fa-plus-circle" style="color:#F59E0B;"></i>
+        <h5>Post Announcement</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Title *</label>
+            <input type="text" name="title" class="form-control" required placeholder="Announcement title" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Content *</label>
+            <textarea name="content" class="form-control" rows="4" required placeholder="Write your announcement here…"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Target Group</label>
+            <select name="group" class="form-select">
+              <option value="">— All My Groups / All Supervised Students —</option>
+              {% for g in groups %}
+              <option value="{{ g.id }}">{{ g.name }}{% if g.company %} — {{ g.company.name }}{% endif %}</option>
+              {% endfor %}
+            </select>
+            <div style="font-size:12px;color:#64748B;margin-top:6px;">Leave blank to notify all students under your groups. Include the company's join code in the message to share it immediately.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Attachment (optional)</label>
+            <input type="file" name="attachment" class="form-control" />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-bullhorn me-1"></i>Post Announcement
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header"><h5>My Announcements</h5></div>
+      <div class="card-body p-0">
+        {% if announcements %}
+          {% for ann in announcements %}
+          <div style="padding:18px 20px; border-bottom:1px solid #E2E8F0;">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div>
+                <span class="badge badge-secondary">{{ ann.get_target_role_display }}</span>
+                {% if ann.group %}<span class="badge badge-info">{{ ann.group.name }}</span>{% endif %}
+              </div>
+              <div style="font-size:12px;color:#94A3B8;">{{ ann.created_at|timesince }} ago</div>
+            </div>
+            <div style="font-size:16px;font-weight:700;color:#1E293B;">{{ ann.title }}</div>
+            <div style="font-size:14px;color:#64748B;margin-top:8px;">{{ ann.content }}</div>
+            {% if ann.attachment %}
+            <a href="{{ ann.attachment.url }}" class="btn btn-sm btn-outline-primary mt-3" target="_blank">
+              <i class="fas fa-paperclip me-1"></i>View Attachment
+            </a>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state" style="padding:60px;">
+            <i class="fas fa-bullhorn"></i>
+            <h5>No announcements posted yet</h5>
+            <p style="color:#94A3B8;">Use the form to publish announcements for your students or groups.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
